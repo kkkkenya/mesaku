@@ -16,20 +16,31 @@ const AboutSection = () => {
 
         <div className="grid md:grid-cols-2 gap-12 items-start">
           <div className={`flex flex-col items-center md:items-start gap-8 ${inView ? "animate-slide-in-left" : "opacity-0"}`}>
-            <div className="relative w-48 h-48">
-              <svg viewBox="0 0 200 200" className="w-full h-full">
+            <div className="relative w-56 h-56">
+              {/* Rotating gear with text */}
+              <svg viewBox="0 0 200 200" className="w-full h-full animate-[spin_20s_linear_infinite]">
                 <defs>
-                  <path id="circlePath" d="M100,100 m-70,0 a70,70 0 1,1 140,0 a70,70 0 1,1 -140,0" />
+                  <path id="gearTextPath" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0" />
                 </defs>
-                <circle cx="100" cy="100" r="85" fill="none" stroke="hsl(var(--border))" strokeWidth="2" />
-                <circle cx="100" cy="100" r="65" fill="none" stroke="hsl(var(--border))" strokeWidth="1" />
-                <text className="text-[11px] font-body uppercase tracking-[3px] fill-navy">
-                  <textPath href="#circlePath" startOffset="5%">
-                    KENYATTA UNIVERSITY MESA • EST 2022 •
+                {/* Gear shape */}
+                <path
+                  d="M100 12 L108 28 L120 18 L122 36 L136 30 L132 48 L148 46 L138 62 L152 64 L138 76 L150 82 L134 90 L142 100 L134 110 L150 118 L138 124 L152 136 L138 138 L148 154 L132 152 L136 170 L122 164 L120 182 L108 172 L100 188 L92 172 L80 182 L78 164 L64 170 L68 152 L52 154 L62 138 L48 136 L62 124 L50 118 L66 110 L58 100 L66 90 L50 82 L62 76 L48 64 L62 62 L52 46 L68 48 L64 30 L78 36 L80 18 L92 28 Z"
+                  fill="none"
+                  stroke="hsl(var(--navy))"
+                  strokeWidth="2"
+                  className="fill-navy/5"
+                />
+                {/* Inner circle */}
+                <circle cx="100" cy="100" r="52" fill="none" stroke="hsl(var(--navy))" strokeWidth="1.5" className="fill-card" />
+                {/* Text along outer path */}
+                <text className="text-[10.5px] font-body uppercase tracking-[4px] fill-navy font-semibold">
+                  <textPath href="#gearTextPath" startOffset="0%">
+                    KENYATTA UNIVERSITY MESA • EST 2022 • KU •
                   </textPath>
                 </text>
               </svg>
-              <Wrench className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 text-navy" />
+              {/* Static center icon */}
+              <Wrench className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 text-navy" />
             </div>
 
             <blockquote className="font-heading italic text-navy text-lg leading-relaxed max-w-sm">
