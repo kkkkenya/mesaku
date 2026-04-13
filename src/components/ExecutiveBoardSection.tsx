@@ -18,7 +18,7 @@ const executives: Executive[] = [
 ];
 
 export default function ExecutiveBoardSection() {
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   return (
     <section
