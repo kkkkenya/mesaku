@@ -18,7 +18,7 @@ const executives: Executive[] = [
 ];
 
 export default function ExecutiveBoardSection() {
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   return (
     <section
@@ -41,7 +41,7 @@ export default function ExecutiveBoardSection() {
         <div className="h-px w-full mb-10" style={{ background: "hsl(0, 0%, 82%)" }} />
 
         {/* Cards row – desktop */}
-        <div className="hidden md:flex gap-2" style={{ height: "520px" }}>
+        <div className="hidden md:flex gap-2" style={{ height: "520px" }} onMouseLeave={() => setActiveIndex(null)}>
           {executives.map((exec, i) => {
             const isActive = i === activeIndex;
             return (
@@ -52,7 +52,7 @@ export default function ExecutiveBoardSection() {
                 style={{
                   flex: isActive ? "3 1 0%" : "1 1 0%",
                   transition: "flex 600ms cubic-bezier(0.4, 0, 0.2, 1)",
-                  filter: isActive ? "none" : "brightness(0.85) saturate(0.7)",
+                  filter: isActive ? "none" : activeIndex !== null ? "brightness(0.85) saturate(0.7)" : "none",
                 }}
               >
                 <img
