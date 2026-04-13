@@ -17,31 +17,34 @@ const AboutSection = () => {
         <div className="grid md:grid-cols-2 gap-12 items-start">
           <div className={`flex flex-col items-center md:items-start gap-8 ${inView ? "animate-slide-in-left" : "opacity-0"}`}>
             <div>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 100 100"
-                width="220"
-                height="220"
-                style={{ display: 'block', margin: '0 auto' }}
-              >
-                <style>{`@keyframes spin { from { transform: rotate(0deg); transform-origin: 50px 50px; } to { transform: rotate(360deg); transform-origin: 50px 50px; } }
-                .gear { animation: spin 6s linear infinite; transform-origin: 50px 50px; }`}</style>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="240" height="240" style={{display:'block', margin:'0 auto'}}>
+                <defs>
+                  <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                  .gear-group { transform-origin: 100px 100px; animation: spin 8s linear infinite; }`}</style>
+                  <path id="topArc" d="M 38,100 A 62,62 0 0,1 162,100" />
+                  <path id="bottomArc" d="M 45,118 A 58,58 0 0,0 155,118" />
+                </defs>
 
-                <g className="gear">
-                  <circle cx="50" cy="50" r="34" fill="none" stroke="#1a2f5a" strokeWidth="4" />
-                  <circle cx="50" cy="50" r="12" fill="#1a2f5a" />
-                  <circle cx="50" cy="50" r="6" fill="white" />
+                <g className="gear-group">
                   {[0,30,60,90,120,150,180,210,240,270,300,330].map((deg, i) => {
-                    const rad = (deg * Math.PI) / 180;
-                    const x1 = 50 + 34 * Math.cos(rad);
-                    const y1 = 50 + 34 * Math.sin(rad);
-                    const x2 = 50 + 44 * Math.cos(rad);
-                    const y2 = 50 + 44 * Math.sin(rad);
-                    return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#1a2f5a" strokeWidth="6" strokeLinecap="round" />;
+                    const rad = deg * Math.PI / 180;
+                    const cx = 100 + 72 * Math.cos(rad);
+                    const cy = 100 + 72 * Math.sin(rad);
+                    return (
+                      <rect key={i} x={cx - 7} y={cy - 7} width="14" height="14" fill="#1a2f5a" rx="2" transform={`rotate(${deg}, ${cx}, ${cy})`} />
+                    );
                   })}
+                  <circle cx="100" cy="100" r="62" fill="#1a2f5a" />
+                  <circle cx="100" cy="100" r="28" fill="white" />
+                  <circle cx="100" cy="100" r="48" fill="none" />
                 </g>
 
-                <text x="50" y="92" textAnchor="middle" fontSize="9" fontWeight="bold" fill="#1a2f5a" fontFamily="serif">MESA</text>
+                <text fill="white" fontSize="10" fontWeight="bold" fontFamily="serif" letterSpacing="2">
+                  <textPath href="#topArc" startOffset="50%" textAnchor="middle">MESA · KU</textPath>
+                </text>
+                <text fill="white" fontSize="9" fontFamily="serif" letterSpacing="1.5">
+                  <textPath href="#bottomArc" startOffset="50%" textAnchor="middle">EST. 2022</textPath>
+                </text>
               </svg>
             </div>
 
