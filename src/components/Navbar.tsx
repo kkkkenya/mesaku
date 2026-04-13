@@ -1,91 +1,107 @@
-import { Wrench, Search, ChevronDown, Menu, X } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Wrench, Menu, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const Navbar = () => {
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", onScroll);
+    onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const navLinks = [
+    { label: "Home", href: "#home" },
+    { label: "About", href: "#about" },
+    { label: "Events", href: "#events" },
+    { label: "Gallery", href: "#gallery" },
+    { label: "Contact", href: "#contact" },
+  ];
+
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled
-          ? "bg-card/95 backdrop-blur-sm border-b border-border shadow-sm"
-          : "bg-transparent"
-      }`}
-    >
-      <div className="container mx-auto px-6 flex items-center justify-between h-16">
-        <a href="#" className="flex items-center gap-2">
-          <Wrench className={`w-8 h-8 transition-colors duration-300 ${scrolled ? "text-primary" : "text-primary-foreground"}`} />
-          <span className={`font-heading text-xl font-bold transition-colors duration-300 ${scrolled ? "text-navy" : "text-primary-foreground"}`}>
-            MESA
-          </span>
+    <div className="fixed top-4 left-0 right-0 z-50 px-4">
+      <header
+        className={[
+          "mx-auto flex max-w-6xl items-center justify-between rounded-full border",
+          "backdrop-blur-xl transition-all duration-200 ease-out",
+          scrolled
+            ? "bg-[#F6EFE6]/95 shadow-[0_14px_36px_rgba(13,11,8,0.14)] px-5 py-3 border-[#0D0B08]/10"
+            : "bg-[#F6EFE6]/85 shadow-[0_10px_30px_rgba(13,11,8,0.10)] px-6 py-4 border-[#0D0B08]/[0.08]",
+        ].join(" ")}
+      >
+        {/* Logo */}
+        <a href="#home" className="flex items-center gap-3 shrink-0">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#0D0B08] text-[#F6EFE6]">
+            <Wrench className="w-5 h-5" />
+          </div>
+          <div className="hidden sm:block">
+            <p className="text-sm font-semibold leading-none text-[#0D0B08] font-heading">
+              MESA
+            </p>
+            <p className="text-xs text-[#5A4D42]">
+              Mechanical Engineering
+            </p>
+          </div>
         </a>
 
-        <div className="hidden md:flex items-center gap-8">
-          {["HOME", "EVENTS", "GALLERY", "PROJECTS"].map((item) => (
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[#5A4D42]">
+          {navLinks.map((link) => (
             <a
-              key={item}
-              href={`#${item.toLowerCase()}`}
-              className={`text-sm font-medium tracking-wide transition-colors duration-300 ${
-                scrolled ? "text-navy hover:text-primary" : "text-primary-foreground/90 hover:text-primary-foreground"
-              }`}
+              key={link.label}
+              href={link.href}
+              className="transition-colors duration-200 hover:text-[#0D0B08]"
             >
-              {item}
+              {link.label}
             </a>
           ))}
-        </div>
+        </nav>
 
-        <div className="hidden md:flex items-center gap-4">
-          <button
-            className={`transition-colors duration-300 ${scrolled ? "text-navy hover:text-primary" : "text-primary-foreground/90 hover:text-primary-foreground"}`}
-            aria-label="Search"
-          >
-            <Search className="w-5 h-5" />
-          </button>
-          <button
-            className={`flex items-center gap-1 text-sm font-medium transition-colors duration-300 ${
-              scrolled ? "text-navy hover:text-primary" : "text-primary-foreground/90 hover:text-primary-foreground"
-            }`}
-          >
-            EN <ChevronDown className="w-3 h-3" />
-          </button>
+        {/* Right side */}
+        <div className="flex items-center gap-3">
           <a
-            href="#apply"
-            className="bg-primary text-primary-foreground px-5 py-2 rounded-md text-sm font-semibold hover:opacity-90 transition-opacity"
+            href="#join"
+            className="hidden sm:inline-flex items-center rounded-full bg-[#1958AD] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#15498f]"
           >
-            JOIN NOW
+            Join Us
           </a>
+          <button
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#0D0B08]/10 text-[#0D0B08] md:hidden"
+            aria-label="Open menu"
+            onClick={() => setMobileOpen(!mobileOpen)}
+          >
+            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
         </div>
+      </header>
 
-        <button
-          className={`md:hidden transition-colors duration-300 ${scrolled ? "text-navy" : "text-primary-foreground"}`}
-          onClick={() => setMobileOpen(!mobileOpen)}
-        >
-          {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
-      </div>
-
+      {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="md:hidden bg-card border-t border-border animate-fade-in">
-          <div className="px-6 py-4 flex flex-col gap-4">
-            {["HOME", "EVENTS", "GALLERY", "PROJECTS"].map((item) => (
-              <a key={item} href={`#${item.toLowerCase()}`} className="text-sm font-medium text-navy">
-                {item}
+        <div className="md:hidden mx-auto max-w-6xl mt-2 rounded-2xl border border-[#0D0B08]/10 bg-[#F6EFE6]/95 backdrop-blur-xl shadow-[0_14px_36px_rgba(13,11,8,0.14)] px-6 py-4 animate-fade-in">
+          <nav className="flex flex-col gap-4">
+            {navLinks.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                onClick={() => setMobileOpen(false)}
+                className="text-sm font-medium text-[#5A4D42] transition-colors hover:text-[#0D0B08]"
+              >
+                {link.label}
               </a>
             ))}
-            <a href="#apply" className="bg-primary text-primary-foreground px-5 py-2 rounded-md text-sm font-semibold text-center">
-              JOIN NOW
+            <a
+              href="#join"
+              onClick={() => setMobileOpen(false)}
+              className="inline-flex items-center justify-center rounded-full bg-[#1958AD] px-5 py-2.5 text-sm font-semibold text-white"
+            >
+              Join Us
             </a>
-          </div>
+          </nav>
         </div>
       )}
-    </nav>
+    </div>
   );
 };
 
