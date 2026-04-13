@@ -62,6 +62,10 @@ export default function ExecutiveBoardSection() {
                   width={640}
                   height={960}
                   className="absolute inset-0 h-full w-full object-cover"
+                  style={{
+                    filter: isActive ? "grayscale(0)" : "grayscale(1)",
+                    transition: "filter 600ms ease",
+                  }}
                 />
                 {/* Bottom gradient */}
                 <div
