@@ -1,205 +1,121 @@
-import { useRef, useCallback, useEffect, useState } from "react";
-import { useInView } from "@/hooks/useInView";
+import { useState } from "react";
+import chairmanImg from "@/assets/exec-chairman.jpg";
+import viceChairImg from "@/assets/exec-vice-chair.jpg";
+import secretaryImg from "@/assets/exec-secretary.jpg";
+import treasurerImg from "@/assets/exec-treasurer.jpg";
 
 interface Executive {
-  role: string;
   name: string;
-  title: string;
-  descriptor: string;
+  role: string;
+  image: string;
 }
 
 const executives: Executive[] = [
-  {
-    role: "Chairman",
-    name: "John Mwangi",
-    title: "Chief Executive Officer",
-    descriptor: "Visionary leader driving MESA's strategic direction",
-  },
-  {
-    role: "Vice Chairperson",
-    name: "Sarah Otieno",
-    title: "Deputy Chief Executive",
-    descriptor: "Championing academic excellence and member engagement",
-  },
-  {
-    role: "General Secretary",
-    name: "David Kimani",
-    title: "Chief Operations Officer",
-    descriptor: "Orchestrating seamless organizational coordination",
-  },
-  {
-    role: "Treasurer",
-    name: "Grace Wanjiku",
-    title: "Chief Financial Officer",
-    descriptor: "Ensuring fiscal integrity and resource optimization",
-  },
+  { name: "Kiprop Sang", role: "Chairman", image: chairmanImg },
+  { name: "Amani Mwangi", role: "Vice Chairperson", image: viceChairImg },
+  { name: "David Kimani", role: "General Secretary", image: secretaryImg },
+  { name: "Grace Wanjiku", role: "Treasurer", image: treasurerImg },
 ];
 
-function ExecutiveCard({ exec, index, inView }: { exec: Executive; index: number; inView: boolean }) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const glowRef = useRef<HTMLDivElement>(null);
-  const [isHovered, setIsHovered] = useState(false);
-  const rafRef = useRef<number>(0);
-  const targetRef = useRef({ rotateX: 0, rotateY: 0, glowX: 50, glowY: 50 });
-  const currentRef = useRef({ rotateX: 0, rotateY: 0, glowX: 50, glowY: 50 });
-
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const card = cardRef.current;
-    if (!card) return;
-    const rect = card.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-    targetRef.current = {
-      rotateX: (0.5 - y) * 8,
-      rotateY: (x - 0.5) * 8,
-      glowX: x * 100,
-      glowY: y * 100,
-    };
-  }, []);
-
-  const handleMouseEnter = useCallback(() => setIsHovered(true), []);
-
-  const handleMouseLeave = useCallback(() => {
-    setIsHovered(false);
-    targetRef.current = { rotateX: 0, rotateY: 0, glowX: 50, glowY: 50 };
-  }, []);
-
-  useEffect(() => {
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReduced) return;
-
-    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-    const animate = () => {
-      const c = currentRef.current;
-      const t = targetRef.current;
-      c.rotateX = lerp(c.rotateX, t.rotateX, 0.08);
-      c.rotateY = lerp(c.rotateY, t.rotateY, 0.08);
-      c.glowX = lerp(c.glowX, t.glowX, 0.08);
-      c.glowY = lerp(c.glowY, t.glowY, 0.08);
-
-      if (cardRef.current) {
-        cardRef.current.style.transform = `perspective(800px) rotateX(${c.rotateX}deg) rotateY(${c.rotateY}deg)`;
-      }
-      if (glowRef.current) {
-        glowRef.current.style.background = `radial-gradient(circle at ${c.glowX}% ${c.glowY}%, rgba(56,189,248,0.15) 0%, transparent 60%)`;
-      }
-      rafRef.current = requestAnimationFrame(animate);
-    };
-    rafRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, []);
-
-  const delays = ["animation-delay-100", "animation-delay-200", "animation-delay-300", "animation-delay-400"];
-
-  return (
-    <div
-      ref={cardRef}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      className={`group relative rounded-xl border transition-all duration-500 ease-out cursor-pointer will-change-transform
-        ${isHovered
-          ? "border-[hsl(195,80%,40%)] shadow-[0_0_30px_-5px_rgba(56,189,248,0.25),0_20px_50px_-15px_rgba(0,0,0,0.5)]"
-          : "border-[hsl(220,10%,20%)] shadow-[0_4px_20px_-5px_rgba(0,0,0,0.3)]"
-        }
-        ${inView ? `animate-fade-in-up ${delays[index]}` : "opacity-0"}
-      `}
-      style={{ transformStyle: "preserve-3d", background: "hsl(220, 15%, 10%)" }}
-    >
-      {/* Glow follower */}
-      <div ref={glowRef} className="pointer-events-none absolute inset-0 rounded-xl opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-
-      {/* Blueprint grid accent */}
-      <div
-        className="pointer-events-none absolute inset-0 rounded-xl opacity-0 transition-opacity duration-700 group-hover:opacity-[0.03]"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(56,189,248,0.5) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(56,189,248,0.5) 1px, transparent 1px)
-          `,
-          backgroundSize: "20px 20px",
-        }}
-      />
-
-      <div className="relative z-10 p-6 md:p-8">
-        {/* Role label */}
-        <div className="mb-6 flex items-center gap-3">
-          <div className="h-px flex-1 bg-gradient-to-r from-[hsl(195,80%,40%)] to-transparent opacity-40 transition-opacity duration-500 group-hover:opacity-80" />
-          <span className="font-body text-xs font-semibold uppercase tracking-[0.2em] text-[hsl(195,70%,55%)] transition-colors duration-300">
-            {exec.role}
-          </span>
-          <div className="h-px flex-1 bg-gradient-to-l from-[hsl(195,80%,40%)] to-transparent opacity-40 transition-opacity duration-500 group-hover:opacity-80" />
-        </div>
-
-        {/* Name */}
-        <h3 className="font-heading text-xl md:text-2xl font-bold tracking-wide transition-all duration-500 group-hover:translate-y-[-2px]"
-          style={{ color: "hsl(210, 20%, 92%)" }}
-        >
-          {exec.name}
-        </h3>
-
-        {/* Title */}
-        <p className="mt-2 font-body text-[11px] font-medium uppercase tracking-[0.15em] text-[hsl(220,10%,50%)] transition-colors duration-500 group-hover:text-[hsl(220,10%,65%)]">
-          {exec.title}
-        </p>
-
-        {/* Hidden hover detail */}
-        <div className="mt-4 overflow-hidden transition-all duration-500 ease-out"
-          style={{ maxHeight: isHovered ? "60px" : "0px", opacity: isHovered ? 1 : 0 }}
-        >
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-[hsl(195,80%,40%)] to-transparent opacity-30 mb-3" />
-          <p className="font-body text-xs text-[hsl(195,60%,60%)] leading-relaxed">
-            {exec.descriptor}
-          </p>
-        </div>
-
-        {/* View Profile link */}
-        <div className="mt-3 overflow-hidden transition-all duration-500 ease-out"
-          style={{ maxHeight: isHovered ? "30px" : "0px", opacity: isHovered ? 1 : 0 }}
-        >
-          <span className="font-body text-[10px] font-semibold uppercase tracking-[0.2em] text-[hsl(195,80%,45%)] transition-colors duration-300 hover:text-[hsl(195,80%,60%)]">
-            View Profile →
-          </span>
-        </div>
-      </div>
-
-      {/* Bottom precision line */}
-      <div className="absolute bottom-0 left-1/2 h-[2px] w-0 -translate-x-1/2 rounded-full bg-gradient-to-r from-transparent via-[hsl(195,80%,40%)] to-transparent transition-all duration-700 group-hover:w-3/4" />
-    </div>
-  );
-}
-
 export default function ExecutiveBoardSection() {
-  const { ref, inView } = useInView();
+  const [activeIndex, setActiveIndex] = useState(0);
 
   return (
-    <section id="executive-board" ref={ref} className="relative py-20 md:py-28 overflow-hidden"
-      style={{ background: "linear-gradient(180deg, hsl(220,15%,8%) 0%, hsl(220,18%,11%) 100%)" }}
+    <section
+      id="executive-board"
+      className="py-16 md:py-24"
+      style={{ background: "hsl(0, 0%, 96%)" }}
     >
-      {/* Subtle background lines */}
-      <div className="pointer-events-none absolute inset-0 opacity-[0.02]"
-        style={{
-          backgroundImage: "linear-gradient(90deg, hsl(195,80%,40%) 1px, transparent 1px)",
-          backgroundSize: "80px 80px",
-        }}
-      />
-
       <div className="container mx-auto px-6">
-        {/* Section header */}
-        <div className={`mb-16 text-center ${inView ? "animate-fade-in-up" : "opacity-0"}`}>
-          <p className="font-body text-xs font-semibold uppercase tracking-[0.3em] text-[hsl(195,70%,50%)] mb-3">
-            Leadership
-          </p>
-          <h2 className="font-heading text-3xl md:text-5xl font-bold tracking-tight" style={{ color: "hsl(210,20%,92%)" }}>
-            Executive Board
-          </h2>
-          <div className="mx-auto mt-4 h-px w-24 bg-gradient-to-r from-transparent via-[hsl(195,80%,40%)] to-transparent" />
+        {/* Header */}
+        <p className="text-xs font-medium uppercase tracking-[0.2em] mb-2"
+          style={{ color: "hsl(0, 0%, 50%)" }}
+        >
+          04 // Leadership
+        </p>
+        <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6"
+          style={{ color: "hsl(0, 0%, 7%)" }}
+        >
+          Executive Board
+        </h2>
+        <div className="h-px w-full mb-10" style={{ background: "hsl(0, 0%, 82%)" }} />
+
+        {/* Cards row – desktop */}
+        <div className="hidden md:flex gap-2" style={{ height: "520px" }}>
+          {executives.map((exec, i) => {
+            const isActive = i === activeIndex;
+            return (
+              <div
+                key={exec.role}
+                onMouseEnter={() => setActiveIndex(i)}
+                className="relative overflow-hidden rounded-sm cursor-pointer"
+                style={{
+                  flex: isActive ? "3 1 0%" : "1 1 0%",
+                  transition: "flex 600ms cubic-bezier(0.4, 0, 0.2, 1)",
+                  filter: isActive ? "none" : "brightness(0.85) saturate(0.7)",
+                }}
+              >
+                <img
+                  src={exec.image}
+                  alt={exec.name}
+                  loading="lazy"
+                  width={640}
+                  height={960}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                {/* Bottom gradient */}
+                <div
+                  className="absolute inset-x-0 bottom-0 h-1/2 pointer-events-none"
+                  style={{
+                    background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)",
+                    opacity: isActive ? 1 : 0,
+                    transition: "opacity 500ms ease",
+                  }}
+                />
+                {/* Text overlay */}
+                <div
+                  className="absolute bottom-0 left-0 p-6"
+                  style={{
+                    opacity: isActive ? 1 : 0,
+                    transform: isActive ? "translateY(0)" : "translateY(12px)",
+                    transition: "opacity 500ms ease, transform 500ms ease",
+                  }}
+                >
+                  <h3 className="text-lg md:text-xl font-bold text-white leading-tight">
+                    {exec.name}
+                  </h3>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/70 mt-1">
+                    {exec.role}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
-        {/* Cards grid */}
-        <div className="mx-auto grid max-w-4xl gap-6 sm:grid-cols-2">
-          {executives.map((exec, i) => (
-            <ExecutiveCard key={exec.role} exec={exec} index={i} inView={inView} />
+        {/* Cards – mobile stacked */}
+        <div className="flex flex-col gap-3 md:hidden">
+          {executives.map((exec) => (
+            <div key={exec.role} className="relative overflow-hidden rounded-sm" style={{ height: "320px" }}>
+              <img
+                src={exec.image}
+                alt={exec.name}
+                loading="lazy"
+                width={640}
+                height={960}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+              <div
+                className="absolute inset-x-0 bottom-0 h-1/2 pointer-events-none"
+                style={{ background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)" }}
+              />
+              <div className="absolute bottom-0 left-0 p-5">
+                <h3 className="text-lg font-bold text-white">{exec.name}</h3>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/70 mt-1">
+                  {exec.role}
+                </p>
+              </div>
+            </div>
           ))}
         </div>
       </div>
