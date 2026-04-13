@@ -41,7 +41,7 @@ export default function ExecutiveBoardSection() {
         <div className="h-px w-full mb-10" style={{ background: "hsl(0, 0%, 82%)" }} />
 
         {/* Cards row – desktop */}
-        <div className="hidden md:flex gap-2" style={{ height: "520px" }}>
+        <div className="hidden md:flex gap-2" style={{ height: "520px" }} onMouseLeave={() => setActiveIndex(null)}>
           {executives.map((exec, i) => {
             const isActive = i === activeIndex;
             return (
