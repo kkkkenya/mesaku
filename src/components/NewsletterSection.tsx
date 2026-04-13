@@ -8,7 +8,7 @@ const NewsletterSection = () => {
     <section className="relative py-24 overflow-hidden" ref={ref}>
       <img
         src={newsletterBg}
-        alt="Students"
+        alt="Students on campus"
         className="absolute inset-0 w-full h-full object-cover"
         loading="lazy"
       />
@@ -17,10 +17,10 @@ const NewsletterSection = () => {
       <div className={`relative z-10 container mx-auto px-6 text-center ${inView ? "animate-fade-in-up" : "opacity-0"}`}>
         <p className="uppercase tracking-[4px] text-primary-foreground/70 text-xs font-semibold mb-3">Newsletter</p>
         <h2 className="font-heading text-3xl md:text-5xl font-bold text-primary-foreground mb-4">
-          Stay Updated with ISS
+          Stay Updated with MESA
         </h2>
         <p className="font-heading italic text-primary-foreground/80 max-w-lg mx-auto mb-8 text-sm md:text-base">
-          "Never miss an update! Subscribe to our newsletter and get the latest news on events, activities, and opportunities directly in your inbox."
+          "Never miss an update! Subscribe to our newsletter and get the latest news on events, workshops, and opportunities directly in your inbox."
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
