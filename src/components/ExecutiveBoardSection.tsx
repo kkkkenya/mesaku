@@ -52,7 +52,7 @@ export default function ExecutiveBoardSection() {
                 style={{
                   flex: isActive ? "3 1 0%" : "1 1 0%",
                   transition: "flex 600ms cubic-bezier(0.4, 0, 0.2, 1)",
-                  filter: isActive ? "none" : "brightness(0.85) saturate(0.7)",
+                  filter: isActive ? "none" : activeIndex !== null ? "brightness(0.85) saturate(0.7)" : "none",
                 }}
               >
                 <img
