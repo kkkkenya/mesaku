@@ -6,28 +6,28 @@ import { useInView } from "@/hooks/useInView";
 
 const events = [
   {
-    title: "Cultural Exchange Night",
-    desc: "Celebrate the beauty of diversity at Cultural Exchange Night! Indulge in a global feast of traditional cuisine, captivating performances, and lively music. Experi...",
+    title: "Engineering Expo & Showcase",
+    desc: "Present your mechanical engineering projects and prototypes to industry professionals and fellow students. Network, learn, and compete for top honours...",
     image: eventCultural,
     day: "28", month: "SEPT", year: "2024",
-    location: "Conference Room, Berkley",
-    time: "6:00 PM – 8:00 PM",
+    location: "Engineering Block, KU",
+    time: "9:00 AM – 4:00 PM",
   },
   {
-    title: "International Movie Screening",
-    desc: "Lights, camera, culture! Join us for an unforgettable evening of storytelling through cinema. Watch films that highlight the uniqueness of different cultures and...",
+    title: "Workshop: Welding & Fabrication",
+    desc: "Get hands-on experience with MIG and TIG welding techniques, metal cutting, and fabrication fundamentals guided by certified instructors...",
     image: eventMovie,
     day: "30", month: "SEPT", year: "2024",
-    location: "Auditorium",
-    time: "7:00 PM – 10:00 PM",
+    location: "Mechanical Lab, KU",
+    time: "10:00 AM – 1:00 PM",
   },
   {
-    title: "Arts Day",
-    desc: "Unleash your artistic side at our Creative Arts Workshop! Whether you're a seasoned artist or a beginner, this hands-on session offers an exciting opp...",
+    title: "CAD Design Bootcamp",
+    desc: "Master SolidWorks and AutoCAD in this intensive bootcamp. Learn 3D modelling, technical drawing, and simulation for real-world engineering applications...",
     image: eventArts,
     day: "28", month: "NOV", year: "2024",
-    location: "Conference Room, Berkley",
-    time: "11:00 AM – 2:00 PM",
+    location: "Computer Lab 3, KU",
+    time: "11:00 AM – 3:00 PM",
   },
 ];
 

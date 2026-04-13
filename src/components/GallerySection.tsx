@@ -10,10 +10,10 @@ const GallerySection = () => {
 
   const images = [
     { src: gallery1, alt: "Students in library", className: "col-span-1 row-span-1" },
-    { src: gallery2, alt: "Friends at sunset", className: "col-span-1 row-span-1" },
-    { src: gallery3, alt: "Lecture hall", className: "col-span-1 row-span-1" },
-    { src: gallery4, alt: "Community gathering", className: "col-span-2 row-span-1" },
-    { src: gallery5, alt: "Students collaborating", className: "col-span-1 row-span-1" },
+    { src: gallery2, alt: "Friends on campus", className: "col-span-1 row-span-1" },
+    { src: gallery3, alt: "Engineering lecture", className: "col-span-1 row-span-1" },
+    { src: gallery4, alt: "Engineering expo", className: "col-span-2 row-span-1" },
+    { src: gallery5, alt: "Students in lab", className: "col-span-1 row-span-1" },
   ];
 
   return (

@@ -1,20 +1,19 @@
-import { Globe } from "lucide-react";
+import { Wrench } from "lucide-react";
 
 const Footer = () => {
   const linkCols = [
     { title: "About Us", links: ["Our Mission", "History"] },
-    { title: "Explore", links: ["Events", "Gallery", "Blog"] },
-    { title: "Support", links: ["Membership", "Volunteer", "Donations"] },
+    { title: "Explore", links: ["Events", "Gallery", "Projects"] },
+    { title: "Support", links: ["Membership", "Volunteer", "Sponsorship"] },
   ];
 
   return (
     <footer className="bg-surface pt-16 pb-6">
       <div className="container mx-auto px-6">
         <div className="grid md:grid-cols-4 gap-10 mb-10">
-          {/* Logo */}
           <div className="flex items-start gap-2">
-            <Globe className="w-8 h-8 text-primary mt-0.5" />
-            <span className="font-heading text-xl font-bold text-navy">ISS Club</span>
+            <Wrench className="w-8 h-8 text-primary mt-0.5" />
+            <span className="font-heading text-xl font-bold text-navy">MESA</span>
           </div>
 
           {linkCols.map((col) => (
