@@ -1,15 +1,30 @@
 import { Wrench, Search, ChevronDown, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border shadow-sm">
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled
+          ? "bg-card/95 backdrop-blur-sm border-b border-border shadow-sm"
+          : "bg-transparent"
+      }`}
+    >
       <div className="container mx-auto px-6 flex items-center justify-between h-16">
         <a href="#" className="flex items-center gap-2">
-          <Wrench className="w-8 h-8 text-primary" />
-          <span className="font-heading text-xl font-bold text-navy">MESA</span>
+          <Wrench className={`w-8 h-8 transition-colors duration-300 ${scrolled ? "text-primary" : "text-primary-foreground"}`} />
+          <span className={`font-heading text-xl font-bold transition-colors duration-300 ${scrolled ? "text-navy" : "text-primary-foreground"}`}>
+            MESA
+          </span>
         </a>
 
         <div className="hidden md:flex items-center gap-8">
@@ -17,7 +32,9 @@ const Navbar = () => {
             <a
               key={item}
               href={`#${item.toLowerCase()}`}
-              className="text-sm font-medium tracking-wide text-navy hover:text-primary transition-colors duration-300"
+              className={`text-sm font-medium tracking-wide transition-colors duration-300 ${
+                scrolled ? "text-navy hover:text-primary" : "text-primary-foreground/90 hover:text-primary-foreground"
+              }`}
             >
               {item}
             </a>
@@ -25,10 +42,17 @@ const Navbar = () => {
         </div>
 
         <div className="hidden md:flex items-center gap-4">
-          <button className="text-navy hover:text-primary transition-colors" aria-label="Search">
+          <button
+            className={`transition-colors duration-300 ${scrolled ? "text-navy hover:text-primary" : "text-primary-foreground/90 hover:text-primary-foreground"}`}
+            aria-label="Search"
+          >
             <Search className="w-5 h-5" />
           </button>
-          <button className="flex items-center gap-1 text-sm font-medium text-navy hover:text-primary transition-colors">
+          <button
+            className={`flex items-center gap-1 text-sm font-medium transition-colors duration-300 ${
+              scrolled ? "text-navy hover:text-primary" : "text-primary-foreground/90 hover:text-primary-foreground"
+            }`}
+          >
             EN <ChevronDown className="w-3 h-3" />
           </button>
           <a
@@ -39,7 +63,10 @@ const Navbar = () => {
           </a>
         </div>
 
-        <button className="md:hidden text-navy" onClick={() => setMobileOpen(!mobileOpen)}>
+        <button
+          className={`md:hidden transition-colors duration-300 ${scrolled ? "text-navy" : "text-primary-foreground"}`}
+          onClick={() => setMobileOpen(!mobileOpen)}
+        >
           {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
       </div>
