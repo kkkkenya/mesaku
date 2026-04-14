@@ -1,8 +1,8 @@
-import { useState } from "react";
 import chairmanImg from "@/assets/exec-chairman.jpg";
 import viceChairImg from "@/assets/exec-vice-chair.jpg";
 import secretaryImg from "@/assets/exec-secretary.jpg";
 import treasurerImg from "@/assets/exec-treasurer.jpg";
+import "./ExecutiveBoard.css";
 
 interface Executive {
   name: string;
@@ -18,86 +18,34 @@ const executives: Executive[] = [
 ];
 
 export default function ExecutiveBoardSection() {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
-
   return (
-    <section
-      id="executive-board"
-      className="py-16 md:py-24"
-      style={{ background: "hsl(0, 0%, 96%)" }}
-    >
+    <section id="executive-board" className="exec-section">
       <div className="container mx-auto px-6">
-        {/* Header */}
-        <p className="text-xs font-medium uppercase tracking-[0.2em] mb-2"
-          style={{ color: "hsl(0, 0%, 50%)" }}
-        >
-          04 // Leadership
-        </p>
-        <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6"
-          style={{ color: "hsl(0, 0%, 7%)" }}
-        >
-          Executive Board
-        </h2>
-        <div className="h-px w-full mb-10" style={{ background: "hsl(0, 0%, 82%)" }} />
+        <p className="section-label">04 // Leadership</p>
+        <h2 className="section-title">Executive Board</h2>
 
-        {/* Cards row – desktop */}
-        <div className="hidden md:flex gap-2" style={{ height: "520px" }} onMouseLeave={() => setActiveIndex(null)}>
-          {executives.map((exec, i) => {
-            const isActive = i === activeIndex;
-            return (
-              <div
-                key={exec.role}
-                onMouseEnter={() => setActiveIndex(i)}
-                className="relative overflow-hidden rounded-sm cursor-pointer"
-                style={{
-                  flex: isActive ? "3 1 0%" : "1 1 0%",
-                  transition: "flex 600ms cubic-bezier(0.4, 0, 0.2, 1)",
-                  filter: isActive ? "none" : activeIndex !== null ? "brightness(0.85) saturate(0.7)" : "none",
-                }}
-              >
-                <img
-                  src={exec.image}
-                  alt={exec.name}
-                  loading="lazy"
-                  width={640}
-                  height={960}
-                  className="absolute inset-0 h-full w-full object-cover"
-                  style={{
-                    filter: isActive ? "grayscale(0)" : "grayscale(1)",
-                    transition: "filter 600ms ease",
-                  }}
-                />
-                {/* Bottom gradient */}
-                <div
-                  className="absolute inset-x-0 bottom-0 h-1/2 pointer-events-none"
-                  style={{
-                    background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)",
-                    opacity: isActive ? 1 : 0,
-                    transition: "opacity 500ms ease",
-                  }}
-                />
-                {/* Text overlay */}
-                <div
-                  className="absolute bottom-0 left-0 p-6"
-                  style={{
-                    opacity: isActive ? 1 : 0,
-                    transform: isActive ? "translateY(0)" : "translateY(12px)",
-                    transition: "opacity 500ms ease, transform 500ms ease",
-                  }}
-                >
-                  <h3 className="text-lg md:text-xl font-bold text-white leading-tight">
-                    {exec.name}
-                  </h3>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/70 mt-1">
-                    {exec.role}
-                  </p>
-                </div>
+        {/* Desktop */}
+        <div className="board hidden md:flex">
+          {executives.map((exec) => (
+            <div key={exec.role} className="member">
+              <img
+                className="member-photo"
+                src={exec.image}
+                alt={exec.name}
+                loading="lazy"
+                width={640}
+                height={960}
+              />
+              <div className="member-overlay" />
+              <div className="member-info">
+                <span className="member-name">{exec.name}</span>
+                <span className="member-role">{exec.role}</span>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
 
-        {/* Cards – mobile stacked */}
+        {/* Mobile */}
         <div className="flex flex-col gap-3 md:hidden">
           {executives.map((exec) => (
             <div key={exec.role} className="relative overflow-hidden rounded-sm" style={{ height: "320px" }}>
