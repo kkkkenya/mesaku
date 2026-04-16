@@ -55,12 +55,20 @@ export default function AdminMerchandise() {
       featured: editing.featured ?? false,
     };
 
+    let result;
     if (editing.id) {
-      await supabase.from("merchandise").update(payload).eq("id", editing.id);
+      result = await supabase.from("merchandise").update(payload).eq("id", editing.id);
     } else {
-      await supabase.from("merchandise").insert(payload);
+      result = await supabase.from("merchandise").insert(payload);
     }
 
+    if (result.error) {
+      toast.error("Failed to save item: " + result.error.message);
+      setSaving(false);
+      return;
+    }
+
+    toast.success(editing.id ? "Item updated" : "Item created");
     setSaving(false);
     setEditing(null);
     setImageFile(null);
