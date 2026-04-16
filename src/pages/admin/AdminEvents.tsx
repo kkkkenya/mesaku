@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Plus, Pencil, Trash2, Eye, EyeOff, X } from "lucide-react";
+import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Event = Tables<"events">;
@@ -53,12 +54,20 @@ export default function AdminEvents() {
       status: editing.status || "draft",
     };
 
+    let result;
     if (editing.id) {
-      await supabase.from("events").update(payload).eq("id", editing.id);
+      result = await supabase.from("events").update(payload).eq("id", editing.id);
     } else {
-      await supabase.from("events").insert(payload);
+      result = await supabase.from("events").insert(payload);
     }
 
+    if (result.error) {
+      toast.error("Failed to save event: " + result.error.message);
+      setSaving(false);
+      return;
+    }
+
+    toast.success(editing.id ? "Event updated" : "Event created");
     setSaving(false);
     setEditing(null);
     setPosterFile(null);
