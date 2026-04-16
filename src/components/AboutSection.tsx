@@ -20,8 +20,7 @@ const AboutSection = () => {
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="360" height="360" style={{display:'block', margin:'0 auto'}}>
                 <defs>
                   <style>{`@keyframes gear-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-                  #full-gear { transform-origin: 100px 100px; animation: gear-spin 8s linear infinite; }
-                  svg:hover #full-gear { animation-play-state: paused; }`}</style>
+                  #full-gear { transform-origin: 100px 100px; animation: gear-spin 8s linear infinite; }`}</style>
                   <path id="topArc" d="M 55,100 A 45,45 0 0,1 145,100" />
                   <path id="bottomArc" d="M 58,108 A 42,42 0 0,0 142,108" />
                 </defs>
