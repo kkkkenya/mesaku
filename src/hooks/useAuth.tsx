@@ -13,6 +13,8 @@ interface AuthCtx {
 
 const AuthContext = createContext<AuthCtx | undefined>(undefined);
 
+const ADMIN_CHECK_TIMEOUT = 5000;
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -23,14 +25,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const checkAdmin = async (userId: string) => {
     if (adminCheckRef.current === userId) return;
     adminCheckRef.current = userId;
-    const { data } = await supabase.rpc("is_admin");
-    setIsAdmin(!!data);
+    try {
+      const result = await Promise.race([
+        supabase.rpc("is_admin"),
+        new Promise<{ data: null; error: Error }>((_, reject) =>
+          setTimeout(() => reject(new Error("Admin check timed out")), ADMIN_CHECK_TIMEOUT)
+        ),
+      ]);
+      setIsAdmin(!!result.data);
+    } catch (err) {
+      console.error("Admin check failed:", err);
+      setIsAdmin(false);
+    }
   };
 
   useEffect(() => {
     let mounted = true;
 
-    // Set up listener FIRST, then get initial session
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, sess) => {
         if (!mounted) return;
@@ -46,7 +57,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    // Initial session — only set loading=false if listener hasn't fired yet
     supabase.auth.getSession().then(async ({ data: { session: sess } }) => {
       if (!mounted) return;
       setSession(sess);
@@ -57,18 +67,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
+    // Fallback: if loading is still true after 6s, force it off
+    const fallbackTimer = setTimeout(() => {
+      if (mounted) setLoading(false);
+    }, 6000);
+
     return () => {
       mounted = false;
       subscription.unsubscribe();
+      clearTimeout(fallbackTimer);
     };
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    // Reset admin cache so re-check happens after login
+    adminCheckRef.current = null;
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error: error as Error | null };
   };
 
   const signOut = async () => {
+    adminCheckRef.current = null;
     await supabase.auth.signOut();
     setIsAdmin(false);
   };
