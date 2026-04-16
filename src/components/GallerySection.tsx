@@ -2,45 +2,37 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { ExternalLink, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useInView } from "@/hooks/useInView";
 
+import gallery1 from "@/assets/gallery/gallery-1.jpg";
+import gallery2 from "@/assets/gallery/gallery-2.jpg";
+import gallery3 from "@/assets/gallery/gallery-3.jpg";
+import gallery4 from "@/assets/gallery/gallery-4.jpg";
+import gallery5 from "@/assets/gallery/gallery-5.jpg";
+import gallery6 from "@/assets/gallery/gallery-6.jpg";
+
 const DRIVE_FOLDER_URL = "https://drive.google.com/drive/folders/1kb5b56PK2p6a61VGI4rAMU7G4KsH7y4u?usp=drive_link";
 
-// TODO: Add VITE_DRIVE_API_KEY to .env for live data
-const placeholderImages = [
-  { id: "placeholder-1", name: "Gallery 1" },
-  { id: "placeholder-2", name: "Gallery 2" },
-  { id: "placeholder-3", name: "Gallery 3" },
-  { id: "placeholder-4", name: "Gallery 4" },
-  { id: "placeholder-5", name: "Gallery 5" },
-  { id: "placeholder-6", name: "Gallery 6" },
+const galleryImages = [
+  { src: gallery1, name: "Computer Lab Session" },
+  { src: gallery2, name: "Team Collaboration" },
+  { src: gallery3, name: "Lecture Hall" },
+  { src: gallery4, name: "Graduate School Building" },
+  { src: gallery5, name: "Workshop Session" },
+  { src: gallery6, name: "Students Having Fun" },
 ];
-
-const thumbnailUrl = (fileId: string) => `https://drive.google.com/thumbnail?id=${fileId}&sz=w400`;
 
 const GallerySection = () => {
   const { ref, inView } = useInView();
-  const [images, setImages] = useState<{ id: string; name: string }[]>([]);
-  const [loading, setLoading] = useState(true);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const touchStartX = useRef(0);
 
-  useEffect(() => {
-    // Simulate loading / use placeholders until API key is configured
-    const timer = setTimeout(() => {
-      setImages(placeholderImages);
-      setLoading(false);
-    }, 800);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const openLightbox = (i: number) => setLightboxIndex(i);
   const closeLightbox = () => setLightboxIndex(null);
   const prev = useCallback(
-    () => setLightboxIndex((i) => (i !== null ? (i - 1 + images.length) % images.length : null)),
-    [images.length],
+    () => setLightboxIndex((i) => (i !== null ? (i - 1 + galleryImages.length) % galleryImages.length : null)),
+    [],
   );
   const next = useCallback(
-    () => setLightboxIndex((i) => (i !== null ? (i + 1) % images.length : null)),
-    [images.length],
+    () => setLightboxIndex((i) => (i !== null ? (i + 1) % galleryImages.length : null)),
+    [],
   );
 
   useEffect(() => {
@@ -73,34 +65,22 @@ const GallerySection = () => {
           Gallery
         </h2>
 
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="aspect-square bg-gray-200 animate-pulse rounded-lg" />
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-            {images.map((img, i) => (
-              <div
-                key={img.id}
-                className={`overflow-hidden rounded-lg cursor-pointer ${inView ? `animate-scale-in animation-delay-${((i % 6) + 1) * 100}` : "opacity-0"}`}
-                onClick={() => openLightbox(i)}
-              >
-                <img
-                  src={thumbnailUrl(img.id)}
-                  alt={img.name}
-                  className="w-full aspect-square object-cover hover:scale-[1.02] transition-transform duration-500"
-                  loading="lazy"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = "none";
-                    (e.target as HTMLImageElement).parentElement!.classList.add("bg-gray-200");
-                  }}
-                />
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+          {galleryImages.map((img, i) => (
+            <div
+              key={img.name}
+              className={`overflow-hidden rounded-lg cursor-pointer ${inView ? `animate-scale-in animation-delay-${((i % 6) + 1) * 100}` : "opacity-0"}`}
+              onClick={() => setLightboxIndex(i)}
+            >
+              <img
+                src={img.src}
+                alt={img.name}
+                className="w-full aspect-square object-cover hover:scale-[1.02] transition-transform duration-500"
+                loading="lazy"
+              />
+            </div>
+          ))}
+        </div>
 
         <div className="flex justify-center mt-10">
           <a
@@ -123,35 +103,26 @@ const GallerySection = () => {
           onTouchEnd={handleTouchEnd}
         >
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              closeLightbox();
-            }}
+            onClick={(e) => { e.stopPropagation(); closeLightbox(); }}
             className="absolute top-4 right-4 text-white z-10"
           >
             <X size={28} />
           </button>
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              prev();
-            }}
+            onClick={(e) => { e.stopPropagation(); prev(); }}
             className="absolute left-4 text-white z-10 p-2"
           >
             <ChevronLeft size={32} />
           </button>
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              next();
-            }}
+            onClick={(e) => { e.stopPropagation(); next(); }}
             className="absolute right-4 text-white z-10 p-2"
           >
             <ChevronRight size={32} />
           </button>
           <img
-            src={thumbnailUrl(images[lightboxIndex].id).replace("w400", "w1200")}
-            alt={images[lightboxIndex].name}
+            src={galleryImages[lightboxIndex].src}
+            alt={galleryImages[lightboxIndex].name}
             className="max-w-[90vw] max-h-[85vh] object-contain rounded-lg"
             onClick={(e) => e.stopPropagation()}
           />
