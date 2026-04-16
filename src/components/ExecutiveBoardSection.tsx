@@ -21,7 +21,7 @@ export default function ExecutiveBoardSection() {
   return (
     <section id="executive-board" className="exec-section">
       <div className="container mx-auto px-6">
-        <p className="section-label">04 // Leadership</p>
+        <p className="section-label">Leadership</p>
         <h2 className="section-title">Executive Board</h2>
 
         {/* Desktop */}
