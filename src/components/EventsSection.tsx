@@ -59,52 +59,66 @@ const EventsSection = () => {
         ) : events.length === 0 ? (
           <p className="text-center text-muted-foreground py-16">No upcoming events right now. Check back soon!</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
             {events.map((event, i) => {
               const dateInfo = event.event_date ? formatDate(event.event_date) : null;
               return (
                 <div
                   key={event.id}
-                  className={`bg-card rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-500 hover:-translate-y-1 ${
+                  className={`bg-card rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-500 hover:-translate-y-1 flex flex-col ${
                     inView ? `animate-fade-in-up animation-delay-${(i + 1) * 100}` : "opacity-0"
                   }`}
                 >
                   {event.poster_url && (
                     <img src={event.poster_url} alt={event.title} className="w-full h-48 object-cover" loading="lazy" />
                   )}
-                  <div className="p-5">
-                    <h3 className="font-heading text-lg font-bold text-navy mb-2">{event.title}</h3>
-                    <p className="text-muted-foreground text-base leading-relaxed mb-4">{event.description}</p>
+                  <div className="p-5 flex flex-col flex-1">
+                    {/* Title */}
+                    <h3 className="font-heading text-lg font-bold text-navy mb-1.5">{event.title}</h3>
 
+                    {/* Description */}
+                    <p className="text-muted-foreground text-sm leading-relaxed mb-4 line-clamp-3">{event.description}</p>
+
+                    {/* Event meta */}
                     {dateInfo && (
-                      <div className="flex items-start gap-4 mb-4">
-                        <div className="text-center">
-                          <span className="text-3xl font-bold text-primary leading-none">{dateInfo.day}</span>
-                          <div className="text-[10px] font-semibold text-muted-foreground tracking-wide">{dateInfo.month}</div>
-                          <div className="text-[10px] text-muted-foreground">{dateInfo.year}</div>
+                      <div className="flex items-center gap-3 rounded-lg bg-muted/50 px-3.5 py-2.5 mb-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1.5 font-semibold text-foreground">
+                          <CalendarCheck className="w-4 h-4 text-primary shrink-0" />
+                          <span>{dateInfo.day} {dateInfo.month} {dateInfo.year}</span>
                         </div>
-                        <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-                          {event.venue && <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{event.venue}</span>}
-                          <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{formatTime(event.event_date!)}</span>
-                        </div>
+                        <span className="text-border">|</span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5 shrink-0" />
+                          {formatTime(event.event_date!)}
+                        </span>
+                        {event.venue && (
+                          <>
+                            <span className="text-border">|</span>
+                            <span className="flex items-center gap-1 truncate">
+                              <MapPin className="w-3.5 h-3.5 shrink-0" />
+                              <span className="truncate">{event.venue}</span>
+                            </span>
+                          </>
+                        )}
                       </div>
                     )}
 
-                    <div className="flex flex-col sm:flex-row gap-2">
+                    {/* Actions — pushed to bottom */}
+                    <div className="mt-auto flex flex-col gap-2">
                       {event.rsvp_url && (
                         <button
                           onClick={() => setRsvpEvent(event)}
-                          className="flex-1 flex items-center justify-center gap-2 bg-[#1E3A8A] text-white h-12 rounded-lg text-base font-semibold hover:opacity-90 transition-opacity"
+                          className="flex items-center justify-center gap-2 bg-[#1E3A8A] text-white h-11 rounded-lg text-sm font-semibold hover:bg-[#15498f] transition-colors w-full"
                         >
-                          <CalendarCheck size={16} /> RSVP
+                          <CalendarCheck size={16} /> RSVP Now
                         </button>
                       )}
                       {event.event_date && (
                         <button
                           onClick={() => addToCalendar(event)}
-                          className="flex-1 flex items-center justify-center gap-2 bg-white text-[#1E3A8A] border-[1.5px] border-[#1E3A8A] h-12 rounded-lg text-base font-semibold hover:bg-[#1E3A8A]/5 transition-colors"
+                          className="flex items-center justify-center gap-2 text-[#1E3A8A] h-9 rounded-lg text-sm font-medium hover:bg-muted/60 transition-colors w-full"
                         >
-                          <CalendarPlus size={16} /> Add to Calendar
+                          <CalendarPlus size={15} /> Add to Calendar
                         </button>
                       )}
                     </div>
