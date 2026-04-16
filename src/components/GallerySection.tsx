@@ -9,7 +9,7 @@ import gallery4 from "@/assets/gallery/gallery-4.jpg";
 import gallery5 from "@/assets/gallery/gallery-5.jpg";
 import gallery6 from "@/assets/gallery/gallery-6.jpg";
 
-const DRIVE_FOLDER_URL = "https://drive.google.com/drive/folders/1kb5b56PK2p6a61VGI4rAMU7G4KsH7y4u?usp=drive_link";
+const DRIVE_FOLDER_URL = "https://drive.google.com/drive/folders/1QQne18fymmmIZZFYGypddydKLPfoAjYd?usp=drive_link";
 
 const galleryImages = [
   { src: gallery1, name: "Computer Lab Session" },
