@@ -71,7 +71,7 @@ const Navbar = () => {
               MESA
             </p>
             <p className="text-xs text-[#5A4D42]">
-              Mechanical Engineering
+              Mechanical Engineering Student Association
             </p>
           </div>
         </a>
