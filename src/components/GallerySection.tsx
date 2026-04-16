@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { ExternalLink, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useInView } from "@/hooks/useInView";
 
-const DRIVE_FOLDER_URL = "https://drive.google.com/drive/folders/1kb5b56PK2p6a61VGI4rAMU7G4KsH7y4u";
+const DRIVE_FOLDER_URL = "https://drive.google.com/drive/folders/1kb5b56PK2p6a61VGI4rAMU7G4KsH7y4u?usp=drive_link";
 
 // TODO: Add VITE_DRIVE_API_KEY to .env for live data
 const placeholderImages = [
@@ -14,8 +14,7 @@ const placeholderImages = [
   { id: "placeholder-6", name: "Gallery 6" },
 ];
 
-const thumbnailUrl = (fileId: string) =>
-  `https://drive.google.com/thumbnail?id=${fileId}&sz=w400`;
+const thumbnailUrl = (fileId: string) => `https://drive.google.com/thumbnail?id=${fileId}&sz=w400`;
 
 const GallerySection = () => {
   const { ref, inView } = useInView();
@@ -35,8 +34,14 @@ const GallerySection = () => {
 
   const openLightbox = (i: number) => setLightboxIndex(i);
   const closeLightbox = () => setLightboxIndex(null);
-  const prev = useCallback(() => setLightboxIndex((i) => (i !== null ? (i - 1 + images.length) % images.length : null)), [images.length]);
-  const next = useCallback(() => setLightboxIndex((i) => (i !== null ? (i + 1) % images.length : null)), [images.length]);
+  const prev = useCallback(
+    () => setLightboxIndex((i) => (i !== null ? (i - 1 + images.length) % images.length : null)),
+    [images.length],
+  );
+  const next = useCallback(
+    () => setLightboxIndex((i) => (i !== null ? (i + 1) % images.length : null)),
+    [images.length],
+  );
 
   useEffect(() => {
     if (lightboxIndex === null) return;
@@ -62,7 +67,9 @@ const GallerySection = () => {
   return (
     <section id="gallery" className="py-12 md:py-20 bg-card" ref={ref}>
       <div className="max-w-6xl mx-auto px-4 md:px-8">
-        <h2 className={`font-heading text-2xl md:text-3xl lg:text-4xl font-bold text-navy mb-12 ${inView ? "animate-fade-in-up" : "opacity-0"}`}>
+        <h2
+          className={`font-heading text-2xl md:text-3xl lg:text-4xl font-bold text-navy mb-12 ${inView ? "animate-fade-in-up" : "opacity-0"}`}
+        >
           Gallery
         </h2>
 
@@ -115,13 +122,31 @@ const GallerySection = () => {
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
-          <button onClick={(e) => { e.stopPropagation(); closeLightbox(); }} className="absolute top-4 right-4 text-white z-10">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              closeLightbox();
+            }}
+            className="absolute top-4 right-4 text-white z-10"
+          >
             <X size={28} />
           </button>
-          <button onClick={(e) => { e.stopPropagation(); prev(); }} className="absolute left-4 text-white z-10 p-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              prev();
+            }}
+            className="absolute left-4 text-white z-10 p-2"
+          >
             <ChevronLeft size={32} />
           </button>
-          <button onClick={(e) => { e.stopPropagation(); next(); }} className="absolute right-4 text-white z-10 p-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              next();
+            }}
+            className="absolute right-4 text-white z-10 p-2"
+          >
             <ChevronRight size={32} />
           </button>
           <img
