@@ -19,23 +19,33 @@ const AboutSection = () => {
             <div>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="360" height="360" style={{display:'block', margin:'0 auto'}}>
                 <defs>
-                  <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-                  .gear-group { transform-origin: 100px 100px; animation: spin 8s linear infinite; }
-                  svg:hover .gear-group { animation-play-state: paused; }`}</style>
+                  <style>{`@keyframes gear-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                  #full-gear { transform-origin: 100px 100px; animation: gear-spin 8s linear infinite; }
+                  svg:hover #full-gear { animation-play-state: paused; }`}</style>
                   <path id="topArc" d="M 55,100 A 45,45 0 0,1 145,100" />
                   <path id="bottomArc" d="M 58,108 A 42,42 0 0,0 142,108" />
                 </defs>
 
-                <g className="gear-group">
+                <g id="full-gear">
+                  <circle cx="100" cy="100" r="62" fill="#1a2f5a" />
                   {[0,30,60,90,120,150,180,210,240,270,300,330].map((deg, i) => {
                     const rad = deg * Math.PI / 180;
-                    const cx = 100 + 72 * Math.cos(rad);
-                    const cy = 100 + 72 * Math.sin(rad);
-                    return (
-                      <rect key={i} x={cx - 8} y={cy - 8} width="16" height="16" fill="#1a2f5a" rx="2" transform={`rotate(${deg}, ${cx}, ${cy})`} />
-                    );
+                    const outerR = 80;
+                    const innerR = 55;
+                    const halfW_base = 9;
+                    const halfW_tip = 7;
+                    const cos = Math.cos(rad);
+                    const sin = Math.sin(rad);
+                    const perpCos = Math.cos(rad + Math.PI / 2);
+                    const perpSin = Math.sin(rad + Math.PI / 2);
+                    const points = [
+                      [100 + innerR * cos + halfW_base * perpCos, 100 + innerR * sin + halfW_base * perpSin],
+                      [100 + outerR * cos + halfW_tip * perpCos, 100 + outerR * sin + halfW_tip * perpSin],
+                      [100 + outerR * cos - halfW_tip * perpCos, 100 + outerR * sin - halfW_tip * perpSin],
+                      [100 + innerR * cos - halfW_base * perpCos, 100 + innerR * sin - halfW_base * perpSin],
+                    ];
+                    return <polygon key={i} points={points.map(p => p.join(",")).join(" ")} fill="#1a2f5a" />;
                   })}
-                  <circle cx="100" cy="100" r="62" fill="#1a2f5a" />
                   <circle cx="100" cy="100" r="28" fill="white" />
                 </g>
 
