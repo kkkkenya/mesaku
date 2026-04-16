@@ -10,8 +10,8 @@ const NewsletterSection = () => {
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = () => {
-    if (!email || !email.includes("@")) {
-      setError("Please enter a valid email.");
+    if (!email || !email.includes("@") || !email.includes(".")) {
+      setError("Please enter a valid email address.");
       return;
     }
     setError("");
@@ -30,9 +30,10 @@ const NewsletterSection = () => {
 
       <div className={`relative z-10 max-w-6xl mx-auto px-4 md:px-8 text-center ${inView ? "animate-fade-in-up" : "opacity-0"}`}>
         {submitted ? (
-          <div className="flex flex-col items-center gap-4">
-            <CheckCircle size={48} className="text-green-400" />
-            <p className="text-primary-foreground text-base">You're in! We'll be in touch at {email}</p>
+          <div className="flex flex-col items-center gap-4 animate-in fade-in duration-500">
+            <CheckCircle size={48} color="#16a34a" />
+            <p className="text-white text-2xl font-bold">You're in! 🎉</p>
+            <p className="text-blue-100 text-base">We'll keep you updated at {email}</p>
           </div>
         ) : (
           <>

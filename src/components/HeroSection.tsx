@@ -27,8 +27,11 @@ const HeroSection = () => {
         <p className="mt-4 text-primary-foreground/80 max-w-xl text-base md:text-lg leading-relaxed animate-fade-in-up animation-delay-200">
           Join MESA at Kenyatta University and be part of a dynamic community of mechanical engineering students building skills, forging connections, and shaping the future.
         </p>
-        <button className="mt-8 bg-primary text-primary-foreground px-8 py-3 rounded-md font-semibold text-sm hover:opacity-90 transition-opacity animate-fade-in-up animation-delay-300">
-          RSVP
+        <button
+          onClick={() => document.getElementById("events")?.scrollIntoView({ behavior: "smooth" })}
+          className="mt-8 bg-primary text-primary-foreground px-8 py-3 rounded-md font-semibold text-sm hover:opacity-90 transition-opacity animate-fade-in-up animation-delay-300"
+        >
+          Explore Events
         </button>
 
         <div className="flex gap-2 mt-8 animate-fade-in animation-delay-400">
