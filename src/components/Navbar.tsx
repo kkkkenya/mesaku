@@ -113,8 +113,10 @@ const Navbar = () => {
       {/* Mobile Menu */}
       <div
         ref={menuRef}
-        className={`md:hidden mx-auto max-w-6xl mt-2 rounded-2xl border border-[#0D0B08]/10 bg-white backdrop-blur-xl shadow-[0_14px_36px_rgba(13,11,8,0.14)] overflow-hidden transition-all duration-200 ease-out ${
-          mobileOpen ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0 border-0 mt-0"
+        className={`md:hidden mx-auto max-w-6xl rounded-2xl border bg-white backdrop-blur-xl shadow-[0_14px_36px_rgba(13,11,8,0.14)] overflow-hidden transition-all duration-300 ease-out ${
+          mobileOpen
+            ? "max-h-[420px] opacity-100 mt-2 border-[#0D0B08]/10 pointer-events-auto"
+            : "max-h-0 opacity-0 mt-0 border-transparent pointer-events-none"
         }`}
       >
         <nav className="flex flex-col">
