@@ -83,14 +83,20 @@ const GallerySection = () => {
           ))}
         </div>
 
-        <div className="flex justify-center mt-10">
+        <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mt-10">
+          <Link
+            to="/gallery"
+            className="bg-[#1E3A8A] text-white px-6 h-12 inline-flex items-center rounded-lg text-base font-semibold hover:bg-[#15498f] transition-colors"
+          >
+            View All Photos
+          </Link>
           <a
             href={DRIVE_FOLDER_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 border-[1.5px] border-[#1E3A8A] text-[#1E3A8A] bg-white px-6 h-12 rounded-lg text-base font-medium hover:bg-[#1E3A8A]/5 transition-colors"
           >
-            View All on Google Drive <ExternalLink size={16} />
+            View on Google Drive <ExternalLink size={16} />
           </a>
         </div>
       </div>
