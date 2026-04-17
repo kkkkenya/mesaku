@@ -1,143 +1,159 @@
 import { Menu, X } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import mesaLogo from "@/assets/mesa-logo.png";
 
 const CLUB_EMAIL = "mechstudentsassociation.ku@gmail.com";
 
+type NavItem =
+  | { label: string; type: "scroll"; targetId: string }
+  | { label: string; type: "route"; to: string }
+  | { label: string; type: "mailto"; email: string };
+
+const navItems: NavItem[] = [
+  { label: "Home", type: "scroll", targetId: "hero" },
+  { label: "About", type: "scroll", targetId: "about" },
+  { label: "Events", type: "route", to: "/events" },
+  { label: "Gallery", type: "route", to: "/gallery" },
+  { label: "Announcements", type: "route", to: "/announcements" },
+  { label: "Merch", type: "scroll", targetId: "merchandise" },
+  { label: "Contact", type: "mailto", email: CLUB_EMAIL },
+];
+
 const Navbar = () => {
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener("scroll", onScroll);
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => {
-    if (!mobileOpen) return;
+    if (!open) return;
     const handler = (e: MouseEvent) => {
-      if (
-        menuRef.current && !menuRef.current.contains(e.target as Node) &&
-        buttonRef.current && !buttonRef.current.contains(e.target as Node)
-      ) {
-        setMobileOpen(false);
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
       }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [mobileOpen]);
+  }, [open]);
 
-  const navLinks = [
-    { label: "Home", href: "#hero" },
-    { label: "About", href: "#about" },
-    { label: "Events", href: "#events" },
-    { label: "Gallery", href: "#gallery" },
-    { label: "Merch", href: "#merchandise" },
-    { label: "Contact", href: `mailto:${CLUB_EMAIL}` },
-  ];
-
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    if (href.startsWith("mailto:")) return;
-    e.preventDefault();
-    const el = document.querySelector(href);
-    if (el) el.scrollIntoView({ behavior: "smooth" });
-    setMobileOpen(false);
+  const handleScroll = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    setOpen(false);
   };
 
+  const handleMailto = (email: string) => {
+    window.location.href = `mailto:${email}`;
+    setOpen(false);
+  };
+
+  const renderLink = (item: NavItem, mobile: boolean) => {
+    const baseDesktop =
+      "text-sm font-medium text-[#1E3A8A] hover:text-[#D4A017] transition-colors duration-150";
+    const baseMobile =
+      "h-12 flex items-center px-5 text-base font-medium text-[#1E3A8A] border-b border-gray-100";
+    const cls = mobile ? baseMobile : baseDesktop;
+
+    if (item.type === "route") {
+      return (
+        <Link key={item.label} to={item.to} className={cls} onClick={() => setOpen(false)}>
+          {item.label}
+        </Link>
+      );
+    }
+    if (item.type === "scroll") {
+      return (
+        <button
+          key={item.label}
+          type="button"
+          onClick={() => handleScroll(item.targetId)}
+          className={`${cls} ${mobile ? "w-full text-left" : ""}`}
+        >
+          {item.label}
+        </button>
+      );
+    }
+    return (
+      <button
+        key={item.label}
+        type="button"
+        onClick={() => handleMailto(item.email)}
+        className={`${cls} ${mobile ? "w-full text-left" : ""}`}
+      >
+        {item.label}
+      </button>
+    );
+  };
+
+  const joinBtnDesktop =
+    "h-9 px-5 rounded-full bg-[#1E3A8A] text-white text-sm font-semibold hover:bg-[#D4A017] transition-colors duration-200";
+  const joinBtnMobile =
+    "w-full h-12 rounded-xl bg-[#1E3A8A] text-white text-base font-semibold hover:bg-[#D4A017] transition-colors duration-200";
+
   return (
-    <div className="fixed top-4 left-0 right-0 z-50 px-4">
-      <header
-        className={[
-          "mx-auto flex max-w-6xl items-center justify-between rounded-full border",
-          "backdrop-blur-xl transition-all duration-200 ease-out",
-          scrolled
-            ? "bg-[#F6EFE6]/95 shadow-[0_14px_36px_rgba(13,11,8,0.14)] px-5 py-3 border-[#0D0B08]/10"
-            : "bg-[#F6EFE6]/85 shadow-[0_10px_30px_rgba(13,11,8,0.10)] px-6 py-4 border-[#0D0B08]/[0.08]",
-        ].join(" ")}
+    <div
+      ref={containerRef}
+      className="fixed top-4 left-1/2 -translate-x-1/2 z-50"
+      style={{ width: "max-content", maxWidth: "calc(100vw - 32px)" }}
+    >
+      {/* Pill */}
+      <div
+        className="bg-white border border-[#e2e8f0] rounded-full shadow-md flex items-center"
+        style={{ height: 56 }}
       >
         {/* Logo */}
-        <a href="#hero" onClick={(e) => handleClick(e, "#hero")} className="flex items-center gap-3 shrink-0">
-          <img
-            src={mesaLogo}
-            alt="MESA KU Logo"
-            className="h-8 md:h-10 w-auto"
-          />
-          <div className="hidden sm:block">
-            <p className="text-sm font-semibold leading-none text-[#0D0B08] font-heading">
-              MESA
-            </p>
-            <p className="text-xs text-[#5A4D42]">
-              Mechanical Engineering Student Association
-            </p>
-          </div>
-        </a>
+        <Link to="/" className="flex items-center gap-2 pl-4 pr-2 shrink-0">
+          <img src={mesaLogo} alt="MESA KU Logo" className="h-9 w-auto" />
+          <span className="hidden sm:inline text-sm font-semibold text-[#1E3A8A] font-heading">
+            MESA KU
+          </span>
+        </Link>
 
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[#5A4D42]">
-          {navLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              onClick={(e) => handleClick(e, link.href)}
-              className="transition-colors duration-200 hover:text-[#0D0B08]"
-            >
-              {link.label}
-            </a>
-          ))}
+        {/* Desktop nav */}
+        <nav className="hidden md:flex items-center gap-6 px-4">
+          {navItems.map((item) => renderLink(item, false))}
         </nav>
 
-        {/* Right side */}
-        <div className="flex items-center gap-3">
-          <a
-            href="#hero"
-            onClick={(e) => handleClick(e, "#hero")}
-            className="hidden sm:inline-flex items-center rounded-full bg-[#1E3A8A] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#15498f]"
+        {/* Desktop Join Us */}
+        <div className="hidden md:flex items-center pr-2">
+          <button
+            type="button"
+            onClick={() => handleScroll("hero")}
+            className={joinBtnDesktop}
           >
             Join Us
-          </a>
-          <button
-            ref={buttonRef}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[#0D0B08]/10 text-[#0D0B08] md:hidden"
-            aria-label="Open menu"
-            onClick={() => setMobileOpen(!mobileOpen)}
-          >
-            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
-      </header>
 
-      {/* Mobile Menu */}
+        {/* Mobile hamburger */}
+        <button
+          type="button"
+          aria-label={open ? "Close menu" : "Open menu"}
+          onClick={() => setOpen((v) => !v)}
+          className="md:hidden ml-auto mr-3 inline-flex h-11 w-11 items-center justify-center text-[#1E3A8A]"
+        >
+          {open ? <X size={22} /> : <Menu size={24} />}
+        </button>
+      </div>
+
+      {/* Mobile dropdown */}
       <div
-        ref={menuRef}
-        className={`md:hidden mx-auto max-w-6xl rounded-2xl border bg-white backdrop-blur-xl shadow-[0_14px_36px_rgba(13,11,8,0.14)] overflow-hidden transition-all duration-300 ease-out ${
-          mobileOpen
-            ? "max-h-[420px] opacity-100 mt-2 border-[#0D0B08]/10 pointer-events-auto"
-            : "max-h-0 opacity-0 mt-0 border-transparent pointer-events-none"
+        className={`md:hidden mt-2 bg-white rounded-2xl shadow-lg border border-[#e2e8f0] overflow-hidden transition-all duration-200 ${
+          open
+            ? "opacity-100 translate-y-0 pointer-events-auto"
+            : "opacity-0 -translate-y-2 pointer-events-none"
         }`}
       >
         <nav className="flex flex-col">
-          {navLinks.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              onClick={(e) => handleClick(e, link.href)}
-              className="text-base font-medium text-[#5A4D42] transition-colors hover:text-[#0D0B08] h-12 flex items-center px-6 border-b border-[#E5E7EB]"
-            >
-              {link.label}
-            </a>
-          ))}
-          <a
-            href="#hero"
-            onClick={(e) => handleClick(e, "#hero")}
-            className="inline-flex items-center justify-center m-4 rounded-full bg-[#1E3A8A] px-5 h-12 text-base font-semibold text-white"
+          {navItems.map((item) => renderLink(item, true))}
+        </nav>
+        <div className="p-4">
+          <button
+            type="button"
+            onClick={() => handleScroll("hero")}
+            className={joinBtnMobile}
           >
             Join Us
-          </a>
-        </nav>
+          </button>
+        </div>
       </div>
     </div>
   );
