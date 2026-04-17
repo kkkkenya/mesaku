@@ -115,7 +115,6 @@ const Navbar = () => {
           to={item.to}
           className={baseCls}
           style={style}
-          onClick={() => setOpen(false)}
         >
           {item.label}
         </Link>
