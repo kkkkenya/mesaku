@@ -44,7 +44,7 @@ const AnnouncementsSection = () => {
   };
 
   return (
-    <section id="announcements" className="py-16 md:py-20 bg-gray-50">
+    <section id="announcements" className="py-16 md:py-20 bg-white">
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         <p className="text-center text-[#D4A017] font-semibold uppercase tracking-wider text-sm">
           Latest

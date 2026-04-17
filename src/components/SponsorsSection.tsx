@@ -17,7 +17,7 @@ const marqueeItems = [...sponsors, ...sponsors];
 
 const SponsorsSection = () => {
   return (
-    <section className="py-16 md:py-20 bg-gray-50">
+    <section className="py-16 md:py-20 bg-white">
       <style>{`@keyframes mesa-marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }`}</style>
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         <p className="text-center text-[#D4A017] font-semibold uppercase tracking-wider text-sm">

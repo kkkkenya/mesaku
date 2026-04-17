@@ -8,7 +8,7 @@ const AboutSection = () => {
   const { ref, inView } = useInView();
 
   return (
-    <section id="about" className="py-20 bg-card" ref={ref}>
+    <section id="about" className="py-20 bg-white" ref={ref}>
       <div className="container mx-auto px-6">
         <h2 className={`font-heading text-3xl md:text-4xl font-bold text-navy mb-12 ${inView ? "animate-fade-in-up" : "opacity-0"}`}>
           About Us
