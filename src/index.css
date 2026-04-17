@@ -127,6 +127,15 @@
   }
 }
 
+@keyframes ken-burns {
+  from { transform: scale(1) translate(0, 0); }
+  to { transform: scale(1.05) translate(-1%, -1%); }
+}
+
+.animate-ken-burns {
+  animation: ken-burns 8s ease-in-out infinite alternate;
+}
+
 .animate-fade-in-up {
   animation: fade-in-up 0.7s ease-out both;
 }
