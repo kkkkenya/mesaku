@@ -1,10 +1,11 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { CalendarDays, ShoppingBag, LogOut, Home } from "lucide-react";
+import { CalendarDays, ShoppingBag, LogOut, Home, Megaphone } from "lucide-react";
 
 const links = [
   { to: "/admin/events", label: "Events", icon: CalendarDays },
   { to: "/admin/merchandise", label: "Merchandise", icon: ShoppingBag },
+  { to: "/admin/announcements", label: "Announcements", icon: Megaphone },
 ];
 
 export default function AdminLayout() {

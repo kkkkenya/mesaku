@@ -11,6 +11,7 @@ import Login from "./pages/Login.tsx";
 import AdminLayout from "./pages/admin/AdminLayout.tsx";
 import AdminEvents from "./pages/admin/AdminEvents.tsx";
 import AdminMerchandise from "./pages/admin/AdminMerchandise.tsx";
+import AdminAnnouncements from "./pages/admin/AdminAnnouncements.tsx";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
               <Route index element={<Navigate to="/admin/events" replace />} />
               <Route path="events" element={<AdminEvents />} />
               <Route path="merchandise" element={<AdminMerchandise />} />
+              <Route path="announcements" element={<AdminAnnouncements />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
