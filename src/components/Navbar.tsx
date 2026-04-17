@@ -26,9 +26,10 @@ const Navbar = () => {
     setOpen(false);
   }, [location.pathname]);
 
-  // Click outside (desktop pill)
+  // Click outside (desktop pill only — mobile drawer is full-screen)
   useEffect(() => {
     if (!open) return;
+    if (typeof window !== "undefined" && window.innerWidth < 768) return;
     const handler = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setOpen(false);
