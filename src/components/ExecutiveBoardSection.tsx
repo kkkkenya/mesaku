@@ -16,6 +16,7 @@ import teddyImg from "@/assets/exec-teddy.png";
 import gloriaImg from "@/assets/exec-gloria.png";
 import godwinImg from "@/assets/exec-godwin.png";
 import stephenImg from "@/assets/exec-stephen.png";
+import lyneforImg from "@/assets/exec-lyneford.png";
 
 interface Executive {
   id: number;
@@ -28,7 +29,7 @@ const executives: Executive[] = [
   { id: 1,  name: "Isaac Omondi Ogweno",     role: "Chairman, MESA",            image: isaacImg },
   { id: 2,  name: "Gregory Muhoro",          role: "Deputy Chair",              image: gregoryImg },
   { id: 3,  name: "Wiseman Kaberia",         role: "Deputy Secretary General",  image: wisemanImg },
-  { id: 4,  name: "Lyneford Muriithi",       role: "Treasurer" },
+  { id: 4,  name: "Lyneford Muriithi",       role: "Treasurer",                 image: lyneforImg },
   { id: 5,  name: "Godwin Fadhili Imbala",   role: "Publicity Secretary",       image: godwinImg },
   { id: 6,  name: "Lewis Kimani",            role: "Industrial Lead",           image: lewisImg },
   { id: 7,  name: "Stephen Kamau G",         role: "Organizing Secretary",      image: stephenImg },
