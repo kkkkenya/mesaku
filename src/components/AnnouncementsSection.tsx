@@ -39,10 +39,6 @@ const AnnouncementsSection = () => {
     };
   }, []);
 
-  const handleViewAll = () => {
-    // TODO: Link to /announcements page when built
-    document.getElementById("announcements")?.scrollIntoView({ behavior: "smooth" });
-  };
 
   return (
     <section id="announcements" className="py-16 md:py-20 bg-white">
