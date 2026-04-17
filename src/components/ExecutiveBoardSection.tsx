@@ -12,6 +12,8 @@ import gregoryImg from "@/assets/exec-gregory.png";
 import wisemanImg from "@/assets/exec-wiseman.png";
 import lewisImg from "@/assets/exec-lewis.png";
 import noelynImg from "@/assets/exec-noelyn.png";
+import teddyImg from "@/assets/exec-teddy.png";
+import gloriaImg from "@/assets/exec-gloria.png";
 
 interface Executive {
   id: number;
@@ -28,8 +30,8 @@ const executives: Executive[] = [
   { id: 5,  name: "Godwin Fadhili Imbala",   role: "Publicity Secretary" },
   { id: 6,  name: "Lewis Kimani",            role: "Industrial Lead",           image: lewisImg },
   { id: 7,  name: "Stephen Kamau G",         role: "Organizing Secretary" },
-  { id: 8,  name: "Teddy Odhiambo Onyango",  role: "1st Year Representative" },
-  { id: 9,  name: "Gloria",                  role: "4th Year Representative" },
+  { id: 8,  name: "Teddy Odhiambo Onyango",  role: "1st Year Representative",   image: teddyImg },
+  { id: 9,  name: "Gloria",                  role: "4th Year Representative",   image: gloriaImg },
   { id: 10, name: "Kituyi Noelyn Nasimiyu",  role: "Assistant Publicity Lead",  image: noelynImg },
 ];
 
