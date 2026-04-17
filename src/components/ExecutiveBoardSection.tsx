@@ -125,12 +125,13 @@ export default function ExecutiveBoardSection() {
 
         {/* Desktop grid: 5 columns × 2 rows */}
         <div className="hidden md:grid grid-cols-5 gap-4">
-          {executives.map((exec) => (
+          {executives.map((exec, idx) => (
             <MemberCard
               key={exec.id}
               name={exec.name}
               role={exec.role}
               image={exec.image}
+              index={idx}
             />
           ))}
         </div>
@@ -140,9 +141,9 @@ export default function ExecutiveBoardSection() {
           className="carousel-hide-scrollbar flex md:hidden overflow-x-auto gap-3 pb-4 snap-x snap-mandatory scroll-smooth -mx-4 px-4"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          {executives.map((exec) => (
+          {executives.map((exec, idx) => (
             <div key={exec.id} className="flex-shrink-0 w-[200px] snap-start">
-              <MemberCard name={exec.name} role={exec.role} image={exec.image} />
+              <MemberCard name={exec.name} role={exec.role} image={exec.image} index={idx} />
             </div>
           ))}
         </div>
