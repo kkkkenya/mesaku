@@ -115,7 +115,6 @@ const Navbar = () => {
           to={item.to}
           className={baseCls}
           style={style}
-          onClick={() => setOpen(false)}
         >
           {item.label}
         </Link>
@@ -125,10 +124,7 @@ const Navbar = () => {
       <button
         key={item.label}
         type="button"
-        onClick={() => {
-          handleScroll(item.targetId, item.path);
-          setOpen(false);
-        }}
+        onClick={() => handleScroll(item.targetId, item.path)}
         className={baseCls}
         style={style}
       >
