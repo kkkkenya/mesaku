@@ -1,9 +1,75 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, ExternalLink, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ExternalLink, X, ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { galleryImages, DRIVE_FOLDER_URL } from "@/data/gallery";
+
+// Individual gallery card with intersection observer + skeleton loader
+const GalleryCard = ({
+  img,
+  index,
+  onClick,
+}: {
+  img: { src: string; name: string };
+  index: number;
+  onClick: () => void;
+}) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.1 },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={cardRef}
+      onClick={onClick}
+      style={{ transitionDelay: visible ? `${(index % 8) * 80}ms` : "0ms" }}
+      className={`group relative overflow-hidden rounded-lg cursor-pointer bg-muted shadow-sm
+        transition-all duration-500 ease-out
+        ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}
+        hover:-translate-y-1 hover:shadow-xl`}
+    >
+      {/* Skeleton */}
+      {!loaded && (
+        <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-muted via-muted/60 to-muted flex items-center justify-center">
+          <ImageIcon className="text-muted-foreground/40" size={28} />
+        </div>
+      )}
+
+      <img
+        src={img.src}
+        alt={img.name}
+        loading="lazy"
+        onLoad={() => setLoaded(true)}
+        className={`w-full aspect-square object-cover transition-all duration-500 ease-out
+          group-hover:scale-[1.07]
+          ${loaded ? "opacity-100" : "opacity-0"}`}
+      />
+
+      {/* Hover gradient overlay + caption */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 p-3 text-white text-sm font-medium translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-400">
+        {img.name}
+      </div>
+    </div>
+  );
+};
 
 const Gallery = () => {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
