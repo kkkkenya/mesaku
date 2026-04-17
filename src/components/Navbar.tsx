@@ -1,29 +1,31 @@
-import { Menu, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import mesaLogo from "@/assets/mesa-logo.png";
 
-const CLUB_EMAIL = "mechstudentsassociation.ku@gmail.com";
-
 type NavItem =
-  | { label: string; type: "scroll"; targetId: string }
-  | { label: string; type: "route"; to: string }
-  | { label: string; type: "mailto"; email: string };
+  | { label: string; type: "scroll"; targetId: string; path: string }
+  | { label: string; type: "route"; to: string };
 
 const navItems: NavItem[] = [
-  { label: "Home", type: "scroll", targetId: "hero" },
-  { label: "About", type: "scroll", targetId: "about" },
+  { label: "Home", type: "route", to: "/" },
+  { label: "About", type: "scroll", targetId: "about", path: "/" },
   { label: "Events", type: "route", to: "/events" },
   { label: "Gallery", type: "route", to: "/gallery" },
   { label: "Announcements", type: "route", to: "/announcements" },
-  { label: "Merch", type: "scroll", targetId: "merchandise" },
-  { label: "Contact", type: "mailto", email: CLUB_EMAIL },
+  { label: "Merch", type: "scroll", targetId: "merchandise", path: "/" },
 ];
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
 
+  // Close on route change
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname]);
+
+  // Click outside (desktop pill)
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
@@ -35,127 +37,197 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
-  const handleScroll = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  // Lock body scroll when mobile drawer open
+  useEffect(() => {
+    if (open && window.innerWidth < 768) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [open]);
+
+  const handleScroll = (id: string, path: string) => {
+    if (location.pathname !== path) {
+      // Navigate first, then scroll after route change
+      window.location.href = `${path}#${id}`;
+    } else {
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    }
     setOpen(false);
   };
 
-  const handleMailto = (email: string) => {
-    window.location.href = `mailto:${email}`;
-    setOpen(false);
+  const isActive = (item: NavItem) => {
+    if (item.type === "route") {
+      if (item.to === "/") return location.pathname === "/";
+      return location.pathname.startsWith(item.to);
+    }
+    return false;
   };
 
-  const renderLink = (item: NavItem, mobile: boolean) => {
-    const baseDesktop =
-      "text-sm font-medium text-[#1E3A8A] hover:text-[#D4A017] transition-colors duration-150";
-    const baseMobile =
-      "h-12 flex items-center px-5 text-base font-medium text-[#1E3A8A] border-b border-gray-100";
-    const cls = mobile ? baseMobile : baseDesktop;
+  // ===== DESKTOP =====
+  const renderDesktopLink = (item: NavItem) => {
+    const active = isActive(item);
+    const cls = `relative text-sm font-medium transition-colors duration-150 ${
+      active ? "text-[#D4A017]" : "text-[#1E3A8A] hover:text-[#D4A017]"
+    } after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-[#D4A017] after:transition-all after:duration-200 ${
+      active ? "after:w-full" : "after:w-0 hover:after:w-full"
+    }`;
 
     if (item.type === "route") {
       return (
-        <Link key={item.label} to={item.to} className={cls} onClick={() => setOpen(false)}>
+        <Link key={item.label} to={item.to} className={cls}>
           {item.label}
         </Link>
-      );
-    }
-    if (item.type === "scroll") {
-      return (
-        <button
-          key={item.label}
-          type="button"
-          onClick={() => handleScroll(item.targetId)}
-          className={`${cls} ${mobile ? "w-full text-left" : ""}`}
-        >
-          {item.label}
-        </button>
       );
     }
     return (
       <button
         key={item.label}
         type="button"
-        onClick={() => handleMailto(item.email)}
-        className={`${cls} ${mobile ? "w-full text-left" : ""}`}
+        onClick={() => handleScroll(item.targetId, item.path)}
+        className={cls}
       >
         {item.label}
       </button>
     );
   };
 
-  const joinBtnDesktop =
-    "h-9 px-5 rounded-full bg-[#1E3A8A] text-white text-sm font-semibold hover:bg-[#D4A017] transition-colors duration-200";
-  const joinBtnMobile =
-    "w-full h-12 rounded-xl bg-[#1E3A8A] text-white text-base font-semibold hover:bg-[#D4A017] transition-colors duration-200";
+  // ===== MOBILE DRAWER LINK =====
+  const renderMobileLink = (item: NavItem, index: number) => {
+    const active = isActive(item);
+    const baseCls = `group relative w-full text-left pl-6 pr-4 py-5 text-[1.4rem] font-bold transition-all duration-300 border-l-[3px] ${
+      active
+        ? "text-[#f5a623] border-[#f5a623]"
+        : "text-white border-transparent hover:text-[#f5a623] hover:border-[#f5a623]"
+    }`;
+    const style: React.CSSProperties = {
+      opacity: open ? 1 : 0,
+      transform: open ? "translateX(0)" : "translateX(-20px)",
+      transition: `opacity 0.3s ease ${100 + index * 50}ms, transform 0.3s ease ${100 + index * 50}ms, color 0.2s, border-color 0.2s`,
+    };
+
+    if (item.type === "route") {
+      return (
+        <Link
+          key={item.label}
+          to={item.to}
+          className={baseCls}
+          style={style}
+          onClick={() => setOpen(false)}
+        >
+          {item.label}
+        </Link>
+      );
+    }
+    return (
+      <button
+        key={item.label}
+        type="button"
+        onClick={() => handleScroll(item.targetId, item.path)}
+        className={baseCls}
+        style={style}
+      >
+        {item.label}
+      </button>
+    );
+  };
 
   return (
-    <div
-      ref={containerRef}
-      className="fixed top-4 left-1/2 -translate-x-1/2 z-50"
-      style={{ width: "max-content", maxWidth: "calc(100vw - 32px)" }}
-    >
-      {/* Pill */}
+    <>
+      {/* ===== DESKTOP PILL (unchanged) ===== */}
       <div
-        className="bg-white border border-[#e2e8f0] rounded-full shadow-md flex items-center"
-        style={{ height: 56 }}
+        ref={containerRef}
+        className="hidden md:block fixed top-4 left-1/2 -translate-x-1/2 z-50"
+        style={{ width: "max-content", maxWidth: "calc(100vw - 32px)" }}
       >
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 pl-4 pr-2 shrink-0">
-          <img src={mesaLogo} alt="MESA KU Logo" className="h-9 w-auto" />
-          <span className="hidden sm:inline text-sm font-semibold text-[#1E3A8A] font-heading">
-            MESA KU
-          </span>
-        </Link>
-
-        {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-6 px-4">
-          {navItems.map((item) => renderLink(item, false))}
-        </nav>
-
-        {/* Desktop Join Us */}
-        <div className="hidden md:flex items-center pr-2">
-          <button
-            type="button"
-            onClick={() => handleScroll("hero")}
-            className={joinBtnDesktop}
-          >
-            Join Us
-          </button>
-        </div>
-
-        {/* Mobile hamburger */}
-        <button
-          type="button"
-          aria-label={open ? "Close menu" : "Open menu"}
-          onClick={() => setOpen((v) => !v)}
-          className="md:hidden ml-auto mr-3 inline-flex h-11 w-11 items-center justify-center text-[#1E3A8A]"
+        <div
+          className="bg-white border border-[#e2e8f0] rounded-full shadow-md flex items-center"
+          style={{ height: 56 }}
         >
-          {open ? <X size={22} /> : <Menu size={24} />}
-        </button>
+          <Link to="/" className="flex items-center gap-2 pl-4 pr-2 shrink-0">
+            <img src={mesaLogo} alt="MESA KU Logo" className="h-9 w-auto" />
+            <span className="hidden sm:inline text-sm font-semibold text-[#1E3A8A] font-heading">
+              MESA KU
+            </span>
+          </Link>
+          <nav className="flex items-center gap-6 px-4 pr-6">
+            {navItems.map((item) => renderDesktopLink(item))}
+          </nav>
+        </div>
       </div>
 
-      {/* Mobile dropdown */}
-      <div
-        className={`md:hidden mt-2 bg-white rounded-2xl shadow-lg border border-[#e2e8f0] overflow-hidden transition-all duration-200 ${
-          open
-            ? "opacity-100 translate-y-0 pointer-events-auto"
-            : "opacity-0 -translate-y-2 pointer-events-none"
-        }`}
-      >
-        <nav className="flex flex-col">
-          {navItems.map((item) => renderLink(item, true))}
-        </nav>
-        <div className="p-4">
+      {/* ===== MOBILE TOP BAR ===== */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-[#1a2e4a] shadow-md">
+        <div className="h-16 flex items-center justify-between px-4">
+          <Link to="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
+            <img src={mesaLogo} alt="MESA KU Logo" className="h-9 w-auto" />
+            <span className="text-base font-semibold text-white font-heading">MESA KU</span>
+          </Link>
+
+          {/* Animated hamburger */}
           <button
             type="button"
-            onClick={() => handleScroll("hero")}
-            className={joinBtnMobile}
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+            className="relative h-11 w-11 inline-flex items-center justify-center"
           >
-            Join Us
+            <span className="sr-only">Toggle menu</span>
+            <div className="relative w-6 h-5">
+              <span
+                className="absolute left-0 top-0 block h-[2px] w-6 bg-white rounded transition-all duration-300 origin-center"
+                style={{
+                  transform: open ? "translateY(9px) rotate(45deg)" : "translateY(0) rotate(0)",
+                }}
+              />
+              <span
+                className="absolute left-0 top-1/2 -translate-y-1/2 block h-[2px] w-6 bg-white rounded transition-all duration-300"
+                style={{ opacity: open ? 0 : 1 }}
+              />
+              <span
+                className="absolute left-0 bottom-0 block h-[2px] w-6 bg-white rounded transition-all duration-300 origin-center"
+                style={{
+                  transform: open ? "translateY(-9px) rotate(-45deg)" : "translateY(0) rotate(0)",
+                }}
+              />
+            </div>
           </button>
         </div>
       </div>
-    </div>
+
+      {/* ===== MOBILE FULL-SCREEN DRAWER ===== */}
+      <div
+        className="md:hidden fixed inset-0 z-40"
+        style={{
+          transform: open ? "translateY(0)" : "translateY(-100%)",
+          transition: "transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+          background:
+            "linear-gradient(135deg, #1a2e4a 0%, #0f1d33 100%)",
+          pointerEvents: open ? "auto" : "none",
+        }}
+        aria-hidden={!open}
+      >
+        {/* Watermark */}
+        <div
+          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          style={{ opacity: 0.04 }}
+        >
+          <img src={mesaLogo} alt="" className="w-[80%] max-w-md" />
+        </div>
+
+        {/* Content */}
+        <div className="relative h-full flex flex-col pt-20 pb-8 px-4">
+          <nav className="flex-1 flex flex-col justify-center gap-1">
+            {navItems.map((item, i) => renderMobileLink(item, i))}
+          </nav>
+        </div>
+      </div>
+
+      {/* Spacer so mobile content isn't hidden under fixed top bar */}
+      <div className="md:hidden h-16" aria-hidden />
+    </>
   );
 };
 
