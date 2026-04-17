@@ -115,6 +115,7 @@ const Navbar = () => {
           to={item.to}
           className={baseCls}
           style={style}
+          onClick={() => setOpen(false)}
         >
           {item.label}
         </Link>
@@ -124,7 +125,10 @@ const Navbar = () => {
       <button
         key={item.label}
         type="button"
-        onClick={() => handleScroll(item.targetId, item.path)}
+        onClick={() => {
+          handleScroll(item.targetId, item.path);
+          setOpen(false);
+        }}
         className={baseCls}
         style={style}
       >
@@ -158,7 +162,7 @@ const Navbar = () => {
       </div>
 
       {/* ===== MOBILE TOP BAR ===== */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-[#1a2e4a] shadow-md">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-[60] bg-[#1a2e4a] shadow-md">
         <div className="h-16 flex items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
             <img src={mesaLogo} alt="MESA KU Logo" className="h-9 w-auto" />
@@ -198,7 +202,7 @@ const Navbar = () => {
 
       {/* ===== MOBILE FULL-SCREEN DRAWER ===== */}
       <div
-        className="md:hidden fixed inset-0 z-40"
+        className="md:hidden fixed inset-0 z-50"
         style={{
           transform: open ? "translateY(0)" : "translateY(-100%)",
           transition: "transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
