@@ -122,24 +122,32 @@ const Gallery = () => {
           </Link>
 
           <h1 className="text-center text-3xl md:text-4xl font-bold text-[#1E3A8A]">Gallery</h1>
-          <p className="text-center text-gray-500 mt-2 mb-10">
+          <p className="text-center text-gray-500 mt-2 mb-8">
             Moments from MESA KU events and activities
           </p>
 
+          {/* Featured hero image with Ken Burns effect */}
+          {galleryImages.length > 0 && (
+            <div
+              onClick={() => setLightboxIndex(0)}
+              className="relative overflow-hidden rounded-xl mb-6 cursor-pointer shadow-lg aspect-[21/9] group"
+            >
+              <img
+                src={galleryImages[0].src}
+                alt={galleryImages[0].name}
+                className="w-full h-full object-cover animate-ken-burns"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              <div className="absolute bottom-4 left-5 text-white">
+                <span className="text-xs uppercase tracking-wider opacity-80">Featured</span>
+                <h2 className="text-lg md:text-2xl font-semibold">{galleryImages[0].name}</h2>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {galleryImages.map((img, i) => (
-              <div
-                key={img.name}
-                className="overflow-hidden rounded-lg cursor-pointer"
-                onClick={() => setLightboxIndex(i)}
-              >
-                <img
-                  src={img.src}
-                  alt={img.name}
-                  className="w-full aspect-square object-cover hover:scale-[1.02] transition-transform duration-500"
-                  loading="lazy"
-                />
-              </div>
+              <GalleryCard key={img.name} img={img} index={i} onClick={() => setLightboxIndex(i)} />
             ))}
           </div>
 
