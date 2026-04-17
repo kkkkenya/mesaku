@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import mesaLogo from "@/assets/mesa-logo.png";
 
 type NavItem =
@@ -19,6 +19,7 @@ const Navbar = () => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Close on route change
   useEffect(() => {
@@ -115,6 +116,11 @@ const Navbar = () => {
           to={item.to}
           className={baseCls}
           style={style}
+          onClick={(e) => {
+            e.preventDefault();
+            setOpen(false);
+            navigate(item.to);
+          }}
         >
           {item.label}
         </Link>
@@ -124,7 +130,10 @@ const Navbar = () => {
       <button
         key={item.label}
         type="button"
-        onClick={() => handleScroll(item.targetId, item.path)}
+        onClick={() => {
+          setOpen(false);
+          handleScroll(item.targetId, item.path);
+        }}
         className={baseCls}
         style={style}
       >
