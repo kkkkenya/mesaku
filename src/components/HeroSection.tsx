@@ -10,7 +10,7 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <section id="home" className="relative h-[85vh] min-h-[600px] flex items-end overflow-hidden">
+    <section id="hero" className="relative h-[85vh] min-h-[600px] flex items-end overflow-hidden">
       <img
         src={heroBg}
         alt="Engineering students at Kenyatta University"

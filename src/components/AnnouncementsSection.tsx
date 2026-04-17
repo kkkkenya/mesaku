@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 type Announcement = {
@@ -109,14 +110,12 @@ const AnnouncementsSection = () => {
         </div>
 
         <div className="flex justify-center mt-10">
-          {announcements.length > 0 && (
-            <button
-              onClick={handleViewAll}
-              className="border border-[#1E3A8A] text-[#1E3A8A] px-6 h-12 rounded-lg hover:bg-[#1E3A8A] hover:text-white transition-colors font-semibold"
-            >
-              View All Announcements
-            </button>
-          )}
+          <Link
+            to="/announcements"
+            className="border border-[#1E3A8A] text-[#1E3A8A] px-6 h-12 inline-flex items-center rounded-lg hover:bg-[#1E3A8A] hover:text-white transition-colors font-semibold"
+          >
+            View All Announcements
+          </Link>
         </div>
       </div>
     </section>

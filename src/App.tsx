@@ -8,6 +8,9 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Login from "./pages/Login.tsx";
+import Announcements from "./pages/Announcements.tsx";
+import Gallery from "./pages/Gallery.tsx";
+import Events from "./pages/Events.tsx";
 import AdminLayout from "./pages/admin/AdminLayout.tsx";
 import AdminEvents from "./pages/admin/AdminEvents.tsx";
 import AdminMerchandise from "./pages/admin/AdminMerchandise.tsx";
@@ -24,6 +27,9 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/announcements" element={<Announcements />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/events" element={<Events />} />
             <Route path="/login" element={<Login />} />
             <Route
               path="/admin"

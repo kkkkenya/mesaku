@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { Link } from "react-router-dom";
 import { ExternalLink, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { useInView } from "@/hooks/useInView";
 
