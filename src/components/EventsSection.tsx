@@ -1,5 +1,6 @@
 import { MapPin, Clock, CalendarCheck, CalendarPlus, X, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useInView } from "@/hooks/useInView";
 import type { Tables } from "@/integrations/supabase/types";
@@ -32,6 +33,7 @@ const EventsSection = () => {
       .select("*")
       .eq("status", "published")
       .order("event_date", { ascending: true })
+      .limit(3)
       .then(({ data }) => {
         setEvents(data || []);
         setLoading(false);
@@ -126,6 +128,17 @@ const EventsSection = () => {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {!loading && events.length > 0 && (
+          <div className="flex justify-center mt-10">
+            <Link
+              to="/events"
+              className="border border-[#1E3A8A] text-[#1E3A8A] px-6 h-12 inline-flex items-center rounded-lg hover:bg-[#1E3A8A] hover:text-white transition-colors font-semibold"
+            >
+              See All Events
+            </Link>
           </div>
         )}
       </div>
