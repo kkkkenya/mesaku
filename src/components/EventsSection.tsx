@@ -130,6 +130,17 @@ const EventsSection = () => {
             })}
           </div>
         )}
+
+        {!loading && events.length > 0 && (
+          <div className="flex justify-center mt-10">
+            <Link
+              to="/events"
+              className="border border-[#1E3A8A] text-[#1E3A8A] px-6 h-12 inline-flex items-center rounded-lg hover:bg-[#1E3A8A] hover:text-white transition-colors font-semibold"
+            >
+              See All Events
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* RSVP Modal */}
