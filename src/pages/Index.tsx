@@ -1,13 +1,13 @@
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import StatsStrip from "@/components/StatsStrip";
-import AnnouncementsSection from "@/components/AnnouncementsSection";
-import WhyJoinSection from "@/components/WhyJoinSection";
-import SponsorsSection from "@/components/SponsorsSection";
 import AboutSection from "@/components/AboutSection";
+import WhyJoinSection from "@/components/WhyJoinSection";
+import AnnouncementsSection from "@/components/AnnouncementsSection";
 import EventsSection from "@/components/EventsSection";
 import GallerySection from "@/components/GallerySection";
 import MerchandiseSection from "@/components/MerchandiseSection";
+import SponsorsSection from "@/components/SponsorsSection";
 import NewsletterSection from "@/components/NewsletterSection";
 import ExecutiveBoardSection from "@/components/ExecutiveBoardSection";
 import Footer from "@/components/Footer";
@@ -16,16 +16,16 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       <Navbar />
-      <main className="pt-16">
+      <main>
         <HeroSection />
         <StatsStrip />
-        <AnnouncementsSection />
-        <WhyJoinSection />
-        <SponsorsSection />
         <AboutSection />
+        <WhyJoinSection />
+        <AnnouncementsSection />
         <EventsSection />
         <GallerySection />
         <MerchandiseSection />
+        <SponsorsSection />
         <NewsletterSection />
         <ExecutiveBoardSection />
       </main>
