@@ -62,7 +62,7 @@ const MerchandiseSection = () => {
   }, []);
 
   return (
-    <section id="merchandise" className="py-12 md:py-20 bg-white">
+    <section id="merchandise" className="py-12 md:py-20 bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         <div className="text-center mb-12">
           <h2 className="font-heading text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900">Merch</h2>
