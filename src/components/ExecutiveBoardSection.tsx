@@ -1,14 +1,13 @@
 // ────────────────────────────────────────────────────────────────
 // EXECUTIVE BOARD — easy image override
 // ────────────────────────────────────────────────────────────────
-// To replace the placeholder avatar for any member, just drop their
-// photo into `src/assets/` and add an `image` field to that entry
-// below. Example:
+// To set a member's photo, drop the file into `src/assets/`, import
+// it at the top of this file, and add `image: yourImg` to that
+// member's entry below. Members without an `image` show a plain
+// light-gray placeholder card.
 //
 //   import isaacImg from "@/assets/isaac.jpg";
 //   { id: 1, name: "Isaac Omondi Ogweno", role: "Chairman, MESA", image: isaacImg },
-//
-// If `image` is missing, a navy initials avatar is used automatically.
 // ────────────────────────────────────────────────────────────────
 
 interface Executive {
@@ -32,53 +31,85 @@ const executives: Executive[] = [
 ];
 
 function MemberCard({ name, role, image }: { name: string; role: string; image?: string }) {
-  const src =
-    image ??
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1E3A8A&color=fff&size=200`;
-
   return (
     <div
-      className="bg-white rounded-xl shadow-md border border-gray-100 p-4 flex flex-col items-center text-center
-                 transition-transform duration-200 hover:scale-100 md:hover:scale-105 hover:shadow-lg"
+      className="group relative w-full overflow-hidden rounded-sm bg-gray-100 cursor-pointer"
+      style={{ aspectRatio: "3 / 4" }}
     >
-      <div className="w-full aspect-square rounded-lg overflow-hidden bg-gray-200 mb-3">
+      {image ? (
         <img
-          src={src}
-          alt={`${name} profile photo`}
+          src={image}
+          alt={`${name} — ${role}`}
           loading="lazy"
-          className="w-full h-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover object-top"
         />
+      ) : (
+        <div className="absolute inset-0 bg-gray-200" />
+      )}
+
+      {/* Hover overlay */}
+      <div
+        className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0) 55%)",
+        }}
+      />
+
+      {/* Always-visible info on mobile, hover-reveal on desktop */}
+      <div className="absolute inset-x-0 bottom-0 p-3 md:p-4 md:opacity-0 md:translate-y-2 md:transition md:duration-300 md:group-hover:opacity-100 md:group-hover:translate-y-0">
+        {/* Mobile gradient (so text stays legible without hover) */}
+        <div
+          className="absolute inset-0 md:hidden pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0) 100%)",
+          }}
+        />
+        <div className="relative">
+          <p className="text-white font-bold text-sm md:text-base leading-tight">
+            {name}
+          </p>
+          <p className="text-white/75 text-[10px] md:text-[11px] font-semibold uppercase tracking-[0.15em] mt-1">
+            {role}
+          </p>
+        </div>
       </div>
-      <p className="font-bold text-[#1E3A8A] text-sm leading-tight">{name}</p>
-      <p className="text-gray-500 text-xs mt-1 leading-snug">{role}</p>
     </div>
   );
 }
 
 export default function ExecutiveBoardSection() {
   return (
-    <section id="executive-board" className="py-16 bg-gray-50">
+    <section id="executive-board" className="py-16 bg-white">
       <style>{`.carousel-hide-scrollbar::-webkit-scrollbar { display: none; }`}</style>
 
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         {/* Section heading */}
-        <div className="mb-10 text-center">
-          <p className="text-xs font-semibold tracking-widest text-[#1E3A8A] uppercase mb-2">
+        <div className="mb-10">
+          <p className="text-xs font-semibold tracking-widest text-gray-500 uppercase mb-2">
             Leadership
           </p>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Executive Board</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+            Executive Board
+          </h2>
         </div>
 
-        {/* Desktop grid */}
-        <div className="hidden md:grid grid-cols-5 gap-6">
+        {/* Desktop grid: 5 columns × 2 rows */}
+        <div className="hidden md:grid grid-cols-5 gap-4">
           {executives.map((exec) => (
-            <MemberCard key={exec.id} name={exec.name} role={exec.role} image={exec.image} />
+            <MemberCard
+              key={exec.id}
+              name={exec.name}
+              role={exec.role}
+              image={exec.image}
+            />
           ))}
         </div>
 
-        {/* Mobile carousel */}
+        {/* Mobile horizontal carousel */}
         <div
-          className="carousel-hide-scrollbar flex md:hidden overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scroll-smooth -mx-4 px-4"
+          className="carousel-hide-scrollbar flex md:hidden overflow-x-auto gap-3 pb-4 snap-x snap-mandatory scroll-smooth -mx-4 px-4"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {executives.map((exec) => (
