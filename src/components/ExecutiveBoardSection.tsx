@@ -7,6 +7,7 @@
 // light-gray placeholder card.
 // ────────────────────────────────────────────────────────────────
 
+import { useState } from "react";
 import isaacImg from "@/assets/exec-isaac.png";
 import gregoryImg from "@/assets/exec-gregory.png";
 import wisemanImg from "@/assets/exec-wiseman.png";
@@ -38,7 +39,20 @@ const executives: Executive[] = [
   { id: 10, name: "Kituyi Noelyn Nasimiyu",  role: "Assistant Publicity Lead",  image: noelynImg },
 ];
 
-function MemberCard({ name, role, image }: { name: string; role: string; image?: string }) {
+function MemberCard({
+  name,
+  role,
+  image,
+  index,
+}: {
+  name: string;
+  role: string;
+  image?: string;
+  index: number;
+}) {
+  const isAboveFold = index < 5;
+  const [loaded, setLoaded] = useState(false);
+
   return (
     <div
       className="group relative w-full overflow-hidden rounded-sm bg-gray-100 cursor-pointer"
@@ -48,8 +62,14 @@ function MemberCard({ name, role, image }: { name: string; role: string; image?:
         <img
           src={image}
           alt={`${name} — ${role}`}
-          loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover object-top"
+          width={400}
+          height={533}
+          loading={isAboveFold ? "eager" : "lazy"}
+          fetchPriority={index === 0 ? "high" : isAboveFold ? "auto" : "low"}
+          decoding="async"
+          onLoad={() => setLoaded(true)}
+          className="absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-300"
+          style={{ opacity: loaded ? 1 : 0 }}
         />
       ) : (
         <div className="absolute inset-0 bg-gray-200" />
