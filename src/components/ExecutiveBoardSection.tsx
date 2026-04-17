@@ -5,10 +5,13 @@
 // it at the top of this file, and add `image: yourImg` to that
 // member's entry below. Members without an `image` show a plain
 // light-gray placeholder card.
-//
-//   import isaacImg from "@/assets/isaac.jpg";
-//   { id: 1, name: "Isaac Omondi Ogweno", role: "Chairman, MESA", image: isaacImg },
 // ────────────────────────────────────────────────────────────────
+
+import isaacImg from "@/assets/exec-isaac.png";
+import gregoryImg from "@/assets/exec-gregory.png";
+import wisemanImg from "@/assets/exec-wiseman.png";
+import lewisImg from "@/assets/exec-lewis.png";
+import noelynImg from "@/assets/exec-noelyn.png";
 
 interface Executive {
   id: number;
@@ -18,16 +21,16 @@ interface Executive {
 }
 
 const executives: Executive[] = [
-  { id: 1,  name: "Isaac Omondi Ogweno",     role: "Chairman, MESA" },
-  { id: 2,  name: "Gregory Muhoro",          role: "Deputy Chair" },
-  { id: 3,  name: "Wiseman Kaberia",         role: "Deputy Secretary General" },
+  { id: 1,  name: "Isaac Omondi Ogweno",     role: "Chairman, MESA",            image: isaacImg },
+  { id: 2,  name: "Gregory Muhoro",          role: "Deputy Chair",              image: gregoryImg },
+  { id: 3,  name: "Wiseman Kaberia",         role: "Deputy Secretary General",  image: wisemanImg },
   { id: 4,  name: "Lyneford Muriithi",       role: "Treasurer" },
   { id: 5,  name: "Godwin Fadhili Imbala",   role: "Publicity Secretary" },
-  { id: 6,  name: "Lewis Kimani",            role: "Industrial Lead" },
+  { id: 6,  name: "Lewis Kimani",            role: "Industrial Lead",           image: lewisImg },
   { id: 7,  name: "Stephen Kamau G",         role: "Organizing Secretary" },
   { id: 8,  name: "Teddy Odhiambo Onyango",  role: "1st Year Representative" },
   { id: 9,  name: "Gloria",                  role: "4th Year Representative" },
-  { id: 10, name: "Kituyi Noelyn Nasimiyu",  role: "Assistant Publicity Lead" },
+  { id: 10, name: "Kituyi Noelyn Nasimiyu",  role: "Assistant Publicity Lead",  image: noelynImg },
 ];
 
 function MemberCard({ name, role, image }: { name: string; role: string; image?: string }) {
