@@ -1,1 +1,4 @@
 project_id = "ttycntukyrmhniyafixk"
+
+[functions.subscribe-mailchimp]
+verify_jwt = false
