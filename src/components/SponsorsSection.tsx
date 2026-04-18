@@ -1,17 +1,72 @@
+import kuasaLogo from "@/assets/partners/kuasa.png";
+import acesLogo from "@/assets/partners/aces_ku.jpg";
+import esaLogo from "@/assets/partners/esa_ku.jpg";
+import ansysLogo from "@/assets/partners/ansys.png";
+import speLogo from "@/assets/partners/spe.png";
+import cezeriLogo from "@/assets/partners/cezeri_lab.png";
+
 type Sponsor = {
   id: string;
   name: string;
   logoUrl: string | null;
   placeholderBg: string;
   placeholderText: string;
+  placeholderTextColor?: string;
 };
 
+// To swap a placeholder for a real logo, set logoUrl to an imported asset or URL.
 const sponsors: Sponsor[] = [
-  { id: "cizeri", name: "Cizeri Labs", logoUrl: null, placeholderBg: "#1E3A8A", placeholderText: "CL" },
-  { id: "ansys", name: "ANSYS", logoUrl: null, placeholderBg: "#FFB71B", placeholderText: "ANSYS" },
-  { id: "solidworks", name: "SolidWorks", logoUrl: null, placeholderBg: "#E2001A", placeholderText: "SW" },
+  {
+    id: "kuasa",
+    name: "KU Aerospace Students Association",
+    logoUrl: kuasaLogo,
+    placeholderBg: "#003366",
+    placeholderText: "KASA",
+  },
+  {
+    id: "aces",
+    name: "Association of Civil Engineering Students, Kenyatta University",
+    logoUrl: acesLogo,
+    placeholderBg: "#5c4033",
+    placeholderText: "ACES",
+  },
+  {
+    id: "esaku",
+    name: "Engineering Students Association, Kenyatta University",
+    logoUrl: esaLogo,
+    placeholderBg: "#1a6b3c",
+    placeholderText: "ESAKU",
+  },
+  {
+    id: "ansys",
+    name: "Ansys",
+    logoUrl: ansysLogo,
+    placeholderBg: "#FFB71B",
+    placeholderText: "ANSYS",
+    placeholderTextColor: "#000000",
+  },
+  {
+    id: "spe",
+    name: "Society of Petroleum Engineers International",
+    logoUrl: speLogo,
+    placeholderBg: "#0055a5",
+    placeholderText: "SPE",
+  },
+  {
+    id: "4ws",
+    name: "4WS Enterprise",
+    logoUrl: null,
+    placeholderBg: "#e63946",
+    placeholderText: "4WS",
+  },
+  {
+    id: "cezeri",
+    name: "Cezeri Lab Ulaanbaatar",
+    logoUrl: cezeriLogo,
+    placeholderBg: "#1a2e4a",
+    placeholderText: "CL",
+  },
 ];
-// TODO: Replace logoUrl values with Supabase storage URLs when real assets are available.
 
 const marqueeItems = [...sponsors, ...sponsors];
 
@@ -33,14 +88,14 @@ const SponsorsSection = () => {
         <div className="overflow-hidden w-full mt-10">
           <div
             style={{
-              animation: "mesa-marquee 12s linear infinite",
+              animation: "mesa-marquee 30s linear infinite",
               display: "flex",
               gap: "60px",
               width: "max-content",
             }}
           >
             {marqueeItems.map((s, idx) => (
-              <div key={`${s.id}-${idx}`} className="flex flex-col items-center gap-2 shrink-0">
+              <div key={`${s.id}-${idx}`} className="flex flex-col items-center gap-2 shrink-0 w-40">
                 {s.logoUrl ? (
                   <img
                     src={s.logoUrl}
@@ -52,9 +107,10 @@ const SponsorsSection = () => {
                   />
                 ) : (
                   <div
-                    className="h-20 w-32 rounded-lg flex items-center justify-center text-white font-bold text-lg"
+                    className="h-20 w-32 rounded-lg flex items-center justify-center font-bold text-lg"
                     style={{
                       backgroundColor: s.placeholderBg,
+                      color: s.placeholderTextColor ?? "#ffffff",
                       filter: "grayscale(100%)",
                       transition: "filter 0.3s ease",
                     }}
@@ -64,7 +120,7 @@ const SponsorsSection = () => {
                     {s.placeholderText}
                   </div>
                 )}
-                <p className="text-[#1E3A8A] font-semibold text-sm text-center">{s.name}</p>
+                <p className="text-[#1E3A8A] font-semibold text-xs text-center leading-tight">{s.name}</p>
               </div>
             ))}
           </div>
