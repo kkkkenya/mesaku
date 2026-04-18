@@ -128,7 +128,7 @@ const StayInTheLoopSection = () => {
             </p>
           )}
           {status === "error" && (
-            <p className="inline-flex items-center gap-2 text-red-300 text-sm font-medium">
+            <p className="inline-flex items-center gap-2 text-destructive-foreground bg-destructive/80 px-3 py-1 rounded-md text-sm font-medium">
               <AlertCircle size={16} />
               {message}
             </p>
