@@ -1,9 +1,11 @@
+import { useEffect, useState } from "react";
 import kuasaLogo from "@/assets/partners/kuasa.png";
 import acesLogo from "@/assets/partners/aces_ku.jpg";
 import esaLogo from "@/assets/partners/esa_ku.jpg";
 import ansysLogo from "@/assets/partners/ansys.png";
 import speLogo from "@/assets/partners/spe.png";
 import cezeriLogo from "@/assets/partners/cezeri_lab.png";
+import fwsLogo from "@/assets/partners/4ws.png";
 
 type Sponsor = {
   id: string;
@@ -55,7 +57,7 @@ const sponsors: Sponsor[] = [
   {
     id: "4ws",
     name: "4WS Enterprise",
-    logoUrl: null,
+    logoUrl: fwsLogo,
     placeholderBg: "#e63946",
     placeholderText: "4WS",
   },
@@ -71,6 +73,18 @@ const sponsors: Sponsor[] = [
 const marqueeItems = [...sponsors, ...sponsors];
 
 const SponsorsSection = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  const baseFilter = isMobile ? "grayscale(0%)" : "grayscale(100%)";
+
   return (
     <section className="py-16 md:py-20 bg-white">
       <style>{`@keyframes mesa-marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }`}</style>
@@ -101,9 +115,9 @@ const SponsorsSection = () => {
                     src={s.logoUrl}
                     alt={s.name}
                     className="h-20 w-32 object-contain"
-                    style={{ filter: "grayscale(100%)", transition: "filter 0.3s ease" }}
+                    style={{ filter: baseFilter, transition: "filter 0.3s ease" }}
                     onMouseEnter={(e) => (e.currentTarget.style.filter = "grayscale(0%)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.filter = "grayscale(100%)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.filter = baseFilter)}
                   />
                 ) : (
                   <div
@@ -111,11 +125,11 @@ const SponsorsSection = () => {
                     style={{
                       backgroundColor: s.placeholderBg,
                       color: s.placeholderTextColor ?? "#ffffff",
-                      filter: "grayscale(100%)",
+                      filter: baseFilter,
                       transition: "filter 0.3s ease",
                     }}
                     onMouseEnter={(e) => (e.currentTarget.style.filter = "grayscale(0%)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.filter = "grayscale(100%)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.filter = baseFilter)}
                   >
                     {s.placeholderText}
                   </div>
