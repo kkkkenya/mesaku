@@ -9,9 +9,22 @@ const escapeHtml = (s: string) =>
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 
-const buildHtml = (subject: string, body: string) => {
-  const safeBody = escapeHtml(body).replace(/\r?\n/g, "<br />");
+// The body may already include simple HTML tags inserted via the toolbar
+// (<strong>, <em>, <h2>, <ul><li>, <blockquote>, <a>). We preserve those
+// by replacing newlines with <br /> without escaping.
+const renderBody = (body: string) => body.replace(/\r?\n/g, "<br />");
+
+const buildHtml = (subject: string, body: string, imageUrl?: string) => {
   const safeSubject = escapeHtml(subject);
+  const safeBody = renderBody(body);
+  const imageBlock = imageUrl
+    ? `<tr>
+            <td style="padding:0;text-align:center;background:#ffffff;">
+              <img src="${escapeHtml(imageUrl)}" alt="Newsletter image" style="display:block;width:100%;max-width:600px;height:auto;border:0;outline:none;text-decoration:none;" />
+            </td>
+          </tr>`
+    : "";
+
   return `<!doctype html>
 <html>
   <body style="margin:0;padding:0;background:#f4f4f7;font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
@@ -25,6 +38,7 @@ const buildHtml = (subject: string, body: string) => {
                 <p style="margin:6px 0 0;color:#D4A017;font-size:13px;letter-spacing:1px;text-transform:uppercase;">${safeSubject}</p>
               </td>
             </tr>
+            ${imageBlock}
             <tr>
               <td style="padding:32px 28px;line-height:1.6;font-size:15px;color:#1f2937;">
                 ${safeBody}
@@ -97,6 +111,9 @@ Deno.serve(async (req) => {
     const previewText = String(payload?.previewText ?? "").trim();
     const body = String(payload?.body ?? "").trim();
     const draft = Boolean(payload?.draft);
+    const testEmail = Boolean(payload?.testEmail);
+    const testEmailAddress = String(payload?.testEmailAddress ?? "").trim();
+    const imageUrl = String(payload?.imageUrl ?? "").trim();
 
     if (!campaignName || campaignName.length > 200) {
       return new Response(JSON.stringify({ error: "Campaign name is required (max 200 chars)." }), {
@@ -121,6 +138,21 @@ Deno.serve(async (req) => {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+    if (imageUrl && imageUrl.length > 1000) {
+      return new Response(JSON.stringify({ error: "Image URL is too long." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (testEmail) {
+      const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!testEmailAddress || !emailRe.test(testEmailAddress)) {
+        return new Response(JSON.stringify({ error: "Valid test email address is required." }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     const apiKey = Deno.env.get("MAILCHIMP_API_KEY");
@@ -148,7 +180,7 @@ Deno.serve(async (req) => {
         settings: {
           subject_line: subject,
           preview_text: previewText,
-          title: campaignName,
+          title: testEmail ? `[TEST] ${campaignName}` : campaignName,
           from_name: "MESA KU",
           reply_to: "gregorykimemiah@gmail.com",
         },
@@ -166,7 +198,7 @@ Deno.serve(async (req) => {
     const campaignId = createJson.id as string;
 
     // Step 2: Set content
-    const html = buildHtml(subject, body);
+    const html = buildHtml(subject, body, imageUrl || undefined);
     const contentRes = await fetch(`${base}/campaigns/${campaignId}/content`, {
       method: "PUT",
       headers: { Authorization: auth, "Content-Type": "application/json" },
@@ -181,7 +213,33 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Step 3: Send (if not draft)
+    // Step 3: Test send OR full send (or draft = do nothing else)
+    if (testEmail) {
+      const testRes = await fetch(`${base}/campaigns/${campaignId}/actions/test`, {
+        method: "POST",
+        headers: { Authorization: auth, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          test_emails: [testEmailAddress],
+          send_type: "html",
+        }),
+      });
+      if (!testRes.ok) {
+        const testJson = await testRes.json().catch(() => ({}));
+        console.error("Test send failed:", testRes.status, testJson);
+        return new Response(
+          JSON.stringify({
+            error: testJson?.detail || "Campaign created but failed to send test email.",
+            campaignId,
+          }),
+          { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      return new Response(
+        JSON.stringify({ success: true, campaignId, testEmail: true, sentTo: testEmailAddress }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     if (!draft) {
       const sendRes = await fetch(`${base}/campaigns/${campaignId}/actions/send`, {
         method: "POST",
