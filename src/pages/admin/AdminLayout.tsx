@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { CalendarDays, ShoppingBag, LogOut, Home, Megaphone, Menu, X } from "lucide-react";
+import { CalendarDays, ShoppingBag, LogOut, Home, Megaphone, Menu, X, Mail } from "lucide-react";
 
 const links = [
   { to: "/admin/events", label: "Events", icon: CalendarDays },
   { to: "/admin/merchandise", label: "Merchandise", icon: ShoppingBag },
   { to: "/admin/announcements", label: "Announcements", icon: Megaphone },
+  { to: "/admin/newsletter", label: "Newsletter", icon: Mail },
 ];
 
 export default function AdminLayout() {

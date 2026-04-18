@@ -16,6 +16,7 @@ import AdminLayout from "./pages/admin/AdminLayout.tsx";
 import AdminEvents from "./pages/admin/AdminEvents.tsx";
 import AdminMerchandise from "./pages/admin/AdminMerchandise.tsx";
 import AdminAnnouncements from "./pages/admin/AdminAnnouncements.tsx";
+import AdminNewsletter from "./pages/admin/AdminNewsletter.tsx";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
               <Route path="events" element={<AdminEvents />} />
               <Route path="merchandise" element={<AdminMerchandise />} />
               <Route path="announcements" element={<AdminAnnouncements />} />
+              <Route path="newsletter" element={<AdminNewsletter />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
