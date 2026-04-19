@@ -50,7 +50,6 @@ function MemberCard({
   image?: string;
   index: number;
 }) {
-  const isAboveFold = index < 5;
   const [loaded, setLoaded] = useState(false);
 
   return (
@@ -64,8 +63,8 @@ function MemberCard({
           alt={`${name} — ${role}`}
           width={400}
           height={533}
-          loading={isAboveFold ? "eager" : "lazy"}
-          fetchPriority={index === 0 ? "high" : isAboveFold ? "auto" : "low"}
+          loading="eager"
+          fetchPriority="high"
           decoding="async"
           onLoad={() => setLoaded(true)}
           className="absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-300"
