@@ -63,9 +63,16 @@ const AboutSection = () => {
           </div>
 
           <div className={`${inView ? "animate-slide-in-right" : "opacity-0"}`}>
-            <h3 className="font-heading text-2xl font-bold text-navy mb-4">Who we are</h3>
+            <h3 className="font-heading text-2xl font-bold text-navy mb-4">Who We Are</h3>
+            <p className="text-muted-foreground leading-relaxed mb-4">
+              MESA-KU (Mechanical Engineering Students Association – Kenyatta University) is a student-led organization dedicated to shaping the future of engineering at KU. We are a community of driven, curious, and innovative mechanical engineering students united by one goal: to grow beyond the classroom.
+            </p>
+            <p className="text-muted-foreground leading-relaxed mb-6">
+              We believe that great engineers are not just built in lecture halls — they are forged through collaboration, hands-on experience, and a relentless passion for problem-solving. MESA-KU exists to provide exactly that environment.
+            </p>
+            <h3 className="font-heading text-2xl font-bold text-navy mb-3">Our Mission</h3>
             <p className="text-muted-foreground leading-relaxed mb-8">
-              The Mechanical Engineering Student Association (MESA) is a vibrant community at Kenyatta University dedicated to empowering mechanical engineering students through hands-on projects, industry mentorship, and academic excellence. Founded in 2022, MESA bridges the gap between classroom theory and real-world application, fostering innovation, teamwork, and professional growth among our members.
+              To enhance mechanical engineering education through innovation, design, and community — empowering students to become world-class engineers and changemakers.
             </p>
 
             <div className="grid grid-cols-3 gap-3">
