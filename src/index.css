@@ -53,6 +53,16 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Admin dashboard tokens */
+    --admin-bg: 210 40% 98%;            /* #f8fafc */
+    --admin-sidebar: 222 47% 11%;       /* #0f172a */
+    --admin-sidebar-foreground: 0 0% 100%;
+    --admin-sidebar-muted: 215 20% 65%;
+    --admin-sidebar-hover: 217 33% 17%;
+    --teal: 173 80% 32%;                 /* #0d9488 */
+    --teal-foreground: 0 0% 100%;
+    --teal-soft: 167 76% 95%;
   }
 }
 
