@@ -69,6 +69,18 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        "admin-bg": "hsl(var(--admin-bg))",
+        "admin-sidebar": {
+          DEFAULT: "hsl(var(--admin-sidebar))",
+          foreground: "hsl(var(--admin-sidebar-foreground))",
+          muted: "hsl(var(--admin-sidebar-muted))",
+          hover: "hsl(var(--admin-sidebar-hover))",
+        },
+        teal: {
+          DEFAULT: "hsl(var(--teal))",
+          foreground: "hsl(var(--teal-foreground))",
+          soft: "hsl(var(--teal-soft))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
