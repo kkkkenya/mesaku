@@ -1,14 +1,19 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadFile } from "@/lib/storage";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Plus, Pencil, Trash2, Eye, EyeOff, X } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Eye, EyeOff, X, CalendarDays } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import EmptyState from "@/components/admin/EmptyState";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 type Event = Tables<"events">;
+
+const inputCls =
+  "w-full h-11 px-3.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal/40 focus:border-teal transition-colors";
+
+const labelCls = "block text-sm font-semibold text-slate-700 mb-1.5";
 
 export default function AdminEvents() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -27,7 +32,9 @@ export default function AdminEvents() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchEvents(); }, []);
+  useEffect(() => {
+    fetchEvents();
+  }, []);
 
   const openNew = () => {
     setEditing({ title: "", description: "", venue: "", rsvp_url: "", status: "draft" });
@@ -54,12 +61,9 @@ export default function AdminEvents() {
       status: editing.status || "draft",
     };
 
-    let result;
-    if (editing.id) {
-      result = await supabase.from("events").update(payload).eq("id", editing.id);
-    } else {
-      result = await supabase.from("events").insert(payload);
-    }
+    const result = editing.id
+      ? await supabase.from("events").update(payload).eq("id", editing.id)
+      : await supabase.from("events").insert(payload);
 
     if (result.error) {
       toast.error("Failed to save event: " + result.error.message);
@@ -86,88 +90,238 @@ export default function AdminEvents() {
     fetchEvents();
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-      </div>
-    );
-  }
-
   return (
-    <div className="max-w-4xl">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-heading text-2xl font-bold">Events</h1>
-        <Button onClick={openNew} className="gap-2">
-          <Plus className="h-4 w-4" /> New Event
-        </Button>
-      </div>
+    <div className="max-w-5xl">
+      <AdminPageHeader
+        title="Events"
+        breadcrumb="Events"
+        subtitle="Manage MESA events — set dates, descriptions, posters, and RSVP links."
+        action={
+          <button
+            onClick={openNew}
+            className="inline-flex items-center gap-2 h-11 px-5 rounded-lg bg-teal text-teal-foreground font-semibold hover:opacity-90 transition-opacity shadow-sm"
+          >
+            <Plus className="h-4 w-4" /> New Event
+          </button>
+        }
+      />
 
       {/* Editor modal */}
       {editing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-card rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="font-heading text-lg font-bold">{editing.id ? "Edit" : "New"} Event</h2>
-              <button onClick={() => setEditing(null)}><X className="h-5 w-5" /></button>
+          <div className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 space-y-4 shadow-xl">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="font-heading text-xl font-bold text-slate-900">
+                {editing.id ? "Edit" : "New"} Event
+              </h2>
+              <button
+                onClick={() => setEditing(null)}
+                className="p-1.5 rounded-md hover:bg-slate-100 text-slate-500"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
-            <Input placeholder="Title" value={editing.title || ""} onChange={(e) => setEditing({ ...editing, title: e.target.value })} />
-            <Textarea placeholder="Description" value={editing.description || ""} onChange={(e) => setEditing({ ...editing, description: e.target.value })} />
-            <Input placeholder="Venue" value={editing.venue || ""} onChange={(e) => setEditing({ ...editing, venue: e.target.value })} />
-            <Input type="datetime-local" value={editing.event_date ? new Date(editing.event_date).toISOString().slice(0, 16) : ""} onChange={(e) => setEditing({ ...editing, event_date: e.target.value ? new Date(e.target.value).toISOString() : null })} />
-            <Input placeholder="RSVP URL" value={editing.rsvp_url || ""} onChange={(e) => setEditing({ ...editing, rsvp_url: e.target.value })} />
+
             <div>
-              <label className="text-sm font-medium">Poster Image</label>
-              {editing.poster_url && !posterFile && (
-                <img src={editing.poster_url} alt="" className="h-32 object-cover rounded-md mb-2" />
-              )}
-              <Input type="file" accept="image/*" onChange={(e) => setPosterFile(e.target.files?.[0] || null)} />
+              <label className={labelCls}>Title</label>
+              <input
+                className={inputCls}
+                placeholder="e.g. Annual Engineering Showcase"
+                value={editing.title || ""}
+                onChange={(e) => setEditing({ ...editing, title: e.target.value })}
+              />
             </div>
-            <select
-              className="w-full h-10 rounded-md border bg-background px-3 text-sm"
-              value={editing.status || "draft"}
-              onChange={(e) => setEditing({ ...editing, status: e.target.value })}
-            >
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-            </select>
-            <Button onClick={save} disabled={saving} className="w-full h-12">
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
-            </Button>
+
+            <div>
+              <label className={labelCls}>Description</label>
+              <textarea
+                className={`${inputCls} h-auto py-3`}
+                rows={4}
+                placeholder="Tell members what to expect…"
+                value={editing.description || ""}
+                onChange={(e) => setEditing({ ...editing, description: e.target.value })}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={labelCls}>Venue</label>
+                <input
+                  className={inputCls}
+                  placeholder="e.g. KU Engineering Hall"
+                  value={editing.venue || ""}
+                  onChange={(e) => setEditing({ ...editing, venue: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className={labelCls}>Date & Time</label>
+                <input
+                  className={inputCls}
+                  type="datetime-local"
+                  value={
+                    editing.event_date
+                      ? new Date(editing.event_date).toISOString().slice(0, 16)
+                      : ""
+                  }
+                  onChange={(e) =>
+                    setEditing({
+                      ...editing,
+                      event_date: e.target.value ? new Date(e.target.value).toISOString() : null,
+                    })
+                  }
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className={labelCls}>RSVP URL</label>
+              <input
+                className={inputCls}
+                placeholder="https://forms.gle/…"
+                value={editing.rsvp_url || ""}
+                onChange={(e) => setEditing({ ...editing, rsvp_url: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className={labelCls}>Poster Image</label>
+              {editing.poster_url && !posterFile && (
+                <img
+                  src={editing.poster_url}
+                  alt=""
+                  className="h-32 object-cover rounded-md mb-2 border border-slate-200"
+                />
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setPosterFile(e.target.files?.[0] || null)}
+                className="text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-teal file:text-teal-foreground file:font-semibold file:cursor-pointer"
+              />
+            </div>
+
+            <div>
+              <label className={labelCls}>Status</label>
+              <select
+                className={inputCls}
+                value={editing.status || "draft"}
+                onChange={(e) => setEditing({ ...editing, status: e.target.value })}
+              >
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+              </select>
+            </div>
+
+            <div className="flex flex-col-reverse sm:flex-row gap-3 pt-3 border-t border-slate-100">
+              <button
+                onClick={() => setEditing(null)}
+                className="h-11 px-6 rounded-lg border-2 border-slate-200 text-slate-700 font-semibold hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={save}
+                disabled={saving}
+                className="flex-1 inline-flex items-center justify-center h-11 px-6 rounded-lg bg-teal text-teal-foreground font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Event"}
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {events.length === 0 ? (
-        <div className="text-center py-20 text-muted-foreground">
-          <p>No events yet. Create your first event!</p>
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-6 w-6 animate-spin text-teal" />
         </div>
+      ) : events.length === 0 ? (
+        <EmptyState
+          icon={<CalendarDays className="h-7 w-7" />}
+          title="No events yet"
+          description="Create your first event to start engaging MESA members."
+          action={
+            <button
+              onClick={openNew}
+              className="inline-flex items-center gap-2 h-10 px-5 rounded-lg bg-teal text-teal-foreground font-semibold hover:opacity-90"
+            >
+              <Plus className="h-4 w-4" /> New Event
+            </button>
+          }
+        />
       ) : (
         <div className="space-y-3">
           {events.map((ev) => (
-            <div key={ev.id} className="flex items-center gap-4 p-4 bg-card rounded-lg border">
+            <div
+              key={ev.id}
+              className="flex items-center gap-4 p-4 bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow"
+            >
               {ev.poster_url && (
-                <img src={ev.poster_url} alt="" className="h-16 w-16 object-cover rounded-md shrink-0" />
+                <img
+                  src={ev.poster_url}
+                  alt=""
+                  className="h-16 w-16 object-cover rounded-lg shrink-0"
+                />
               )}
               <div className="flex-1 min-w-0">
-                <p className="font-semibold truncate">{ev.title}</p>
-                <p className="text-sm text-muted-foreground">
-                  {ev.event_date ? new Date(ev.event_date).toLocaleDateString() : "No date"} · {ev.venue || "No venue"}
+                <p className="font-semibold truncate text-slate-900">{ev.title}</p>
+                <p className="text-sm text-slate-500">
+                  {ev.event_date ? new Date(ev.event_date).toLocaleDateString() : "No date"} ·{" "}
+                  {ev.venue || "No venue"}
                 </p>
               </div>
-              <span className={`text-xs font-medium px-2 py-1 rounded-full ${ev.status === "published" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
+              <span
+                className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                  ev.status === "published"
+                    ? "bg-teal text-teal-foreground"
+                    : "bg-slate-200 text-slate-700"
+                }`}
+              >
                 {ev.status}
               </span>
               <div className="flex gap-1">
-                <Button variant="ghost" size="icon" onClick={() => toggleStatus(ev)} title={ev.status === "published" ? "Unpublish" : "Publish"}>
-                  {ev.status === "published" ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => { setEditing(ev); setPosterFile(null); }}>
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => remove(ev.id)}>
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => toggleStatus(ev)}
+                      className="p-2 rounded-md hover:bg-slate-100 text-slate-600"
+                    >
+                      {ev.status === "published" ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {ev.status === "published" ? "Unpublish" : "Publish"}
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => {
+                        setEditing(ev);
+                        setPosterFile(null);
+                      }}
+                      className="p-2 rounded-md hover:bg-slate-100 text-slate-600"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>Edit</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => remove(ev.id)}
+                      className="p-2 rounded-md hover:bg-red-50 text-red-600"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>Delete</TooltipContent>
+                </Tooltip>
               </div>
             </div>
           ))}
