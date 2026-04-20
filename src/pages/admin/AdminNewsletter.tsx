@@ -18,6 +18,8 @@ import {
   Link as LinkIcon,
   History,
   TestTube2,
+  Mail,
+  TrendingUp,
 } from "lucide-react";
 import {
   Dialog,
@@ -27,6 +29,8 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 type Member = { email: string; subscribed_at: string };
 type Campaign = {
@@ -39,10 +43,32 @@ type Campaign = {
   emailsSent: number;
 };
 
-const NAVY = "#1E3A8A";
-const GOLD = "#D4A017";
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+
+const inputCls =
+  "w-full h-11 px-3.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal/40 focus:border-teal transition-colors";
+const labelCls = "block text-sm font-semibold text-slate-700 mb-1.5";
+
+function SectionHeading({
+  children,
+  icon,
+  action,
+}: {
+  children: React.ReactNode;
+  icon?: React.ReactNode;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 mb-3">
+      <h2 className="font-heading text-lg md:text-xl font-bold text-slate-900 inline-flex items-center gap-2.5 pl-3 border-l-4 border-teal">
+        {icon}
+        {children}
+      </h2>
+      {action}
+    </div>
+  );
+}
 
 export default function AdminNewsletter() {
   // Subscribers
@@ -124,6 +150,12 @@ export default function AdminNewsletter() {
     fetchSubs();
     fetchCampaigns();
   }, []);
+
+  // Trend: count members with subscribed_at within the last 7 days
+  const newThisWeek = members.filter((m) => {
+    const t = new Date(m.subscribed_at).getTime();
+    return !Number.isNaN(t) && Date.now() - t < 7 * 24 * 60 * 60 * 1000;
+  }).length;
 
   // ===== Image upload =====
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -330,12 +362,11 @@ export default function AdminNewsletter() {
 
   const statusBadge = (status: string) => {
     const s = status.toLowerCase();
-    if (s === "sent") return { label: "sent", cls: "bg-green-100 text-green-800 border-green-200" };
+    if (s === "sent") return "bg-teal text-teal-foreground";
     if (s === "sending" || s === "schedule" || s === "scheduled")
-      return { label: s, cls: "bg-yellow-100 text-yellow-800 border-yellow-200" };
-    if (s === "draft" || s === "save")
-      return { label: "draft", cls: "bg-gray-100 text-gray-700 border-gray-200" };
-    return { label: s, cls: "bg-blue-100 text-blue-800 border-blue-200" };
+      return "bg-amber-100 text-amber-800";
+    if (s === "draft" || s === "save") return "bg-slate-200 text-slate-700";
+    return "bg-blue-100 text-blue-800";
   };
 
   const mailchimpCampaignUrl = (c: Campaign) =>
@@ -343,152 +374,140 @@ export default function AdminNewsletter() {
       ? `https://admin.mailchimp.com/campaigns/show/?id=${c.webId}`
       : "https://admin.mailchimp.com/campaigns/";
 
+  const refreshBtn = (loading: boolean, onClick: () => void) => (
+    <button
+      onClick={onClick}
+      disabled={loading}
+      className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+    >
+      {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+      Refresh
+    </button>
+  );
+
   return (
     <div>
-      <h1 className="font-heading text-xl md:text-2xl font-bold mb-4 md:mb-6" style={{ color: NAVY }}>
-        Newsletter
-      </h1>
+      <AdminPageHeader
+        title="Newsletter"
+        breadcrumb="Newsletter"
+        subtitle="View subscribers and send email campaigns directly through Mailchimp."
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
         {/* ===== LEFT: Subscribers + Campaign history ===== */}
-        <section className="space-y-4">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="font-heading text-lg md:text-xl font-bold" style={{ color: NAVY }}>
+        <section className="space-y-6">
+          <div>
+            <SectionHeading
+              icon={<Users className="h-5 w-5 text-teal" />}
+              action={refreshBtn(loadingList, fetchSubs)}
+            >
               Subscribers
-            </h2>
-            <button
-              onClick={fetchSubs}
-              disabled={loadingList}
-              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md border text-sm font-medium hover:bg-muted disabled:opacity-50"
-            >
-              {loadingList ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <RefreshCw className="h-4 w-4" />
-              )}
-              Refresh
-            </button>
-          </div>
+            </SectionHeading>
 
-          {/* Stat card */}
-          <div
-            className="rounded-xl p-5 flex items-center gap-4 border"
-            style={{ backgroundColor: "#FFF8E1", borderColor: "#F1D78A" }}
-          >
-            <div
-              className="h-12 w-12 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: GOLD }}
-            >
-              <Users className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-[#7a5a00]">Total Subscribers</p>
-              <p className="font-heading text-3xl font-bold" style={{ color: NAVY }}>
-                {loadingList && total === null ? "—" : total ?? 0}
-              </p>
-            </div>
-          </div>
-
-          {/* Subscriber list */}
-          <div className="border rounded-lg overflow-hidden">
-            <div className="bg-muted px-4 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              10 most recent
-            </div>
-            {listError ? (
-              <div className="p-4 text-sm text-red-600">{listError}</div>
-            ) : loadingList ? (
-              <div className="p-6 flex items-center justify-center text-muted-foreground">
-                <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading…
+            {/* Stat card */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex items-center gap-4">
+              <div className="h-12 w-12 rounded-xl bg-teal-soft flex items-center justify-center text-teal shrink-0">
+                <Users className="h-6 w-6" />
               </div>
-            ) : members.length === 0 ? (
-              <div className="p-6 text-sm text-muted-foreground text-center">No subscribers yet.</div>
-            ) : (
-              <ul className="divide-y">
-                {members.map((m, i) => (
-                  <li
-                    key={`${m.email}-${i}`}
-                    className={`flex items-center justify-between gap-3 px-4 py-3 text-sm ${
-                      i % 2 === 0 ? "bg-white" : "bg-gray-50"
-                    }`}
-                  >
-                    <span className="truncate font-medium text-gray-900">{m.email}</span>
-                    <span className="shrink-0 text-xs text-muted-foreground">
-                      {formatDate(m.subscribed_at)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-slate-500">Total Subscribers</p>
+                <p className="font-heading text-3xl font-bold text-slate-900 leading-tight">
+                  {loadingList && total === null ? "—" : total ?? 0}
+                </p>
+                {newThisWeek > 0 && (
+                  <p className="mt-0.5 text-xs font-semibold text-teal inline-flex items-center gap-1">
+                    <TrendingUp className="h-3 w-3" />↑ {newThisWeek} new this week
+                  </p>
+                )}
+              </div>
+            </div>
 
-          <a
-            href="https://mailchimp.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 w-full h-11 rounded-md font-semibold text-white shadow-sm hover:opacity-90 transition"
-            style={{ backgroundColor: GOLD }}
-          >
-            Open Mailchimp Dashboard
-            <ExternalLink className="h-4 w-4" />
-          </a>
+            {/* Subscriber list */}
+            <div className="mt-4 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+              <div className="bg-slate-50 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-100">
+                10 most recent
+              </div>
+              {listError ? (
+                <div className="p-4 text-sm text-red-600">{listError}</div>
+              ) : loadingList ? (
+                <div className="p-6 flex items-center justify-center text-slate-500">
+                  <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading…
+                </div>
+              ) : members.length === 0 ? (
+                <div className="p-6 text-sm text-slate-500 text-center">No subscribers yet.</div>
+              ) : (
+                <ul>
+                  {members.map((m, i) => (
+                    <li
+                      key={`${m.email}-${i}`}
+                      className={`flex items-center justify-between gap-3 px-4 py-3 text-sm transition-colors hover:bg-teal-soft/40 ${
+                        i % 2 === 0 ? "bg-white" : "bg-slate-50/60"
+                      }`}
+                    >
+                      <span className="truncate font-medium text-slate-900">{m.email}</span>
+                      <span className="shrink-0 text-xs text-slate-500">
+                        {formatDate(m.subscribed_at)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <a
+              href="https://mailchimp.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex items-center justify-center gap-2 w-full h-11 rounded-lg border-2 border-teal text-teal font-semibold hover:bg-teal hover:text-teal-foreground transition-colors"
+            >
+              Open Mailchimp Dashboard
+              <ExternalLink className="h-4 w-4" />
+            </a>
+          </div>
 
           {/* ===== Recent Campaigns ===== */}
-          <div className="pt-2">
-            <div className="flex items-center justify-between gap-3 mb-3">
-              <h2
-                className="font-heading text-lg md:text-xl font-bold inline-flex items-center gap-2"
-                style={{ color: NAVY }}
-              >
-                <History className="h-5 w-5" /> Recent Campaigns
-              </h2>
-              <button
-                onClick={fetchCampaigns}
-                disabled={loadingCampaigns}
-                className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md border text-sm font-medium hover:bg-muted disabled:opacity-50"
-              >
-                {loadingCampaigns ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4" />
-                )}
-                Refresh
-              </button>
-            </div>
-            <div className="border rounded-lg overflow-hidden">
+          <div>
+            <SectionHeading
+              icon={<History className="h-5 w-5 text-teal" />}
+              action={refreshBtn(loadingCampaigns, fetchCampaigns)}
+            >
+              Recent Campaigns
+            </SectionHeading>
+
+            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
               {campaignsError ? (
                 <div className="p-4 text-sm text-red-600">{campaignsError}</div>
               ) : loadingCampaigns ? (
-                <div className="p-6 flex items-center justify-center text-muted-foreground">
+                <div className="p-6 flex items-center justify-center text-slate-500">
                   <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading…
                 </div>
               ) : campaigns.length === 0 ? (
-                <div className="p-6 text-sm text-muted-foreground text-center">
-                  No campaigns yet.
-                </div>
+                <div className="p-6 text-sm text-slate-500 text-center">No campaigns yet.</div>
               ) : (
-                <ul className="divide-y">
+                <ul>
                   {campaigns.map((c, i) => {
-                    const badge = statusBadge(c.status);
                     const dateIso = c.sendTime || c.createTime;
                     return (
                       <li
                         key={c.id}
-                        className={`px-4 py-3 text-sm ${i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
+                        className={`px-4 py-3 text-sm transition-colors hover:bg-teal-soft/40 ${
+                          i % 2 === 0 ? "bg-white" : "bg-slate-50/60"
+                        }`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0 flex-1">
-                            <p className="font-semibold text-gray-900 truncate">{c.subject}</p>
-                            <div className="mt-1 flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                            <p className="font-semibold text-slate-900 truncate">{c.subject}</p>
+                            <div className="mt-1 flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500">
                               <span
-                                className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[11px] font-medium capitalize ${badge.cls}`}
+                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold capitalize ${statusBadge(
+                                  c.status,
+                                )}`}
                               >
-                                {badge.label}
+                                {c.status.toLowerCase()}
                               </span>
                               <span>{formatDate(dateIso)}</span>
                               {c.emailsSent > 0 && (
-                                <span>
-                                  {c.emailsSent.toLocaleString()} sent
-                                </span>
+                                <span>{c.emailsSent.toLocaleString()} sent</span>
                               )}
                             </div>
                           </div>
@@ -496,10 +515,9 @@ export default function AdminNewsletter() {
                             href={mailchimpCampaignUrl(c)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="shrink-0 inline-flex items-center gap-1 text-xs font-medium hover:underline"
-                            style={{ color: NAVY }}
+                            className="shrink-0 inline-flex items-center gap-1 text-xs font-semibold text-teal hover:underline"
                           >
-                            View <ExternalLink className="h-3 w-3" />
+                            View in Mailchimp <ExternalLink className="h-3 w-3" />
                           </a>
                         </div>
                       </li>
@@ -513,15 +531,15 @@ export default function AdminNewsletter() {
 
         {/* ===== RIGHT: Compose ===== */}
         <section className="space-y-4">
-          <h2 className="font-heading text-lg md:text-xl font-bold" style={{ color: NAVY }}>
+          <SectionHeading icon={<Mail className="h-5 w-5 text-teal" />}>
             Send Newsletter Campaign
-          </h2>
+          </SectionHeading>
 
           {result && (
             <div
-              className={`flex items-start gap-2 rounded-md border p-3 text-sm ${
+              className={`flex items-start gap-2 rounded-lg border p-3 text-sm ${
                 result.kind === "success"
-                  ? "bg-green-50 border-green-200 text-green-800"
+                  ? "bg-teal-soft border-teal/30 text-teal"
                   : "bg-red-50 border-red-200 text-red-700"
               }`}
             >
@@ -537,7 +555,7 @@ export default function AdminNewsletter() {
                     href="https://mailchimp.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline font-medium"
+                    className="underline font-semibold"
                   >
                     Open Mailchimp →
                   </a>
@@ -546,49 +564,49 @@ export default function AdminNewsletter() {
             </div>
           )}
 
-          <div className="space-y-4">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-5">
             <div>
-              <label className="block text-sm font-medium mb-1">Campaign Name</label>
+              <label className={labelCls}>Campaign Name</label>
               <input
                 type="text"
                 value={campaignName}
                 onChange={(e) => setCampaignName(e.target.value)}
                 placeholder="e.g. April 2026 Update"
-                className="w-full border border-input rounded-md h-10 px-3"
+                className={inputCls}
               />
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 Internal name (not shown to subscribers)
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Email Subject Line</label>
+              <label className={labelCls}>Email Subject Line</label>
               <input
                 type="text"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 placeholder="What subscribers see in their inbox"
-                className="w-full border border-input rounded-md h-10 px-3"
+                className={inputCls}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">
-                Preview Text <span className="text-muted-foreground font-normal">(optional)</span>
+              <label className={labelCls}>
+                Preview Text <span className="text-slate-400 font-normal">(optional)</span>
               </label>
               <input
                 type="text"
                 value={previewText}
                 onChange={(e) => setPreviewText(e.target.value)}
                 placeholder="Inbox preview/subtitle"
-                className="w-full border border-input rounded-md h-10 px-3"
+                className={inputCls}
               />
             </div>
 
             {/* Message body with toolbar */}
             <div>
-              <label className="block text-sm font-medium mb-1">Message Body</label>
-              <div className="flex flex-wrap items-center gap-1 p-1.5 border border-input border-b-0 rounded-t-md bg-muted/40">
+              <label className={labelCls}>Message Body</label>
+              <div className="flex flex-wrap items-center gap-1 p-1.5 border border-slate-200 border-b-0 rounded-t-lg bg-slate-50">
                 <ToolbarBtn label="Bold" onClick={handleBold}>
                   <Bold className="h-4 w-4" />
                 </ToolbarBtn>
@@ -611,16 +629,16 @@ export default function AdminNewsletter() {
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
                 placeholder="Write your newsletter message here. Line breaks are preserved. Toolbar inserts simple HTML tags."
-                className="w-full border border-input rounded-b-md p-3 font-sans text-sm leading-relaxed"
+                className="w-full border border-slate-200 rounded-b-lg p-3 font-sans text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-teal/40 focus:border-teal"
               />
-              <p className="text-xs text-muted-foreground mt-1">
-                Wrapped automatically in a clean MESA KU email template.
+              <p className="text-xs text-slate-500 mt-1">
+                Wrapped automatically in a clean MESA-KU email template.
               </p>
             </div>
 
             {/* Image / poster upload */}
             <div>
-              <label className="block text-sm font-medium mb-2">Attach Image / Poster</label>
+              <label className={labelCls}>Attach Image / Poster</label>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -633,8 +651,7 @@ export default function AdminNewsletter() {
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadingImage}
-                  className="inline-flex items-center gap-2 h-10 px-4 rounded-md border-2 border-dashed text-sm font-medium hover:bg-muted disabled:opacity-60"
-                  style={{ borderColor: NAVY, color: NAVY }}
+                  className="inline-flex items-center gap-2 h-11 px-4 rounded-lg border-2 border-dashed border-teal text-teal text-sm font-semibold hover:bg-teal-soft disabled:opacity-60 transition-colors"
                 >
                   {uploadingImage ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -645,62 +662,51 @@ export default function AdminNewsletter() {
                 </button>
               ) : (
                 <div className="space-y-2">
-                  <div className="rounded-md border p-2 bg-gray-50 flex items-center justify-center">
+                  <div className="rounded-lg border border-slate-200 p-2 bg-slate-50 flex items-center justify-center">
                     <img
                       src={imageUrl}
                       alt="Newsletter preview"
                       className="max-h-[200px] w-auto object-contain"
                     />
                   </div>
-                  <input
-                    type="text"
-                    readOnly
-                    value={imageUrl}
-                    onClick={(e) => (e.target as HTMLInputElement).select()}
-                    className="w-full border border-input rounded-md h-9 px-3 text-xs bg-gray-50 text-muted-foreground"
-                  />
                   <button
                     type="button"
                     onClick={removeImage}
-                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md border text-sm font-medium text-red-600 border-red-200 hover:bg-red-50"
+                    className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-red-200 text-sm font-semibold text-red-600 hover:bg-red-50"
                   >
                     <XIcon className="h-4 w-4" /> Remove
                   </button>
                 </div>
               )}
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 JPG, PNG, GIF, WEBP — max 5MB. Appears below the header in the email.
               </p>
               {imageError && <p className="text-xs text-red-600 mt-1">{imageError}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">Send To</label>
-              <select
-                disabled
-                className="w-full border border-input rounded-md h-10 px-3 bg-background"
-              >
+              <label className={labelCls}>Send To</label>
+              <select disabled className={`${inputCls} opacity-70`}>
                 <option>All Subscribers</option>
               </select>
             </div>
 
             {/* Test send row */}
-            <div className="rounded-md border p-3 bg-muted/30 space-y-2">
-              <label className="block text-sm font-medium">Test Email Address</label>
+            <div className="rounded-lg border border-slate-200 p-4 bg-slate-50/60 space-y-2">
+              <label className={labelCls}>Test Email Address</label>
               <div className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="email"
                   value={testEmailAddress}
                   onChange={(e) => setTestEmailAddress(e.target.value)}
                   placeholder="you@example.com"
-                  className="flex-1 border border-input rounded-md h-10 px-3"
+                  className={`${inputCls} flex-1`}
                 />
                 <button
                   type="button"
                   onClick={sendTest}
                   disabled={sendingTest || sending !== null}
-                  className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-md font-semibold border-2 text-sm hover:bg-[#1E3A8A] hover:text-white transition disabled:opacity-60"
-                  style={{ borderColor: NAVY, color: sendingTest ? "white" : NAVY, backgroundColor: sendingTest ? NAVY : "transparent" }}
+                  className="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-lg border-2 border-teal text-teal text-sm font-semibold hover:bg-teal hover:text-teal-foreground transition-colors disabled:opacity-60"
                 >
                   {sendingTest ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -710,7 +716,7 @@ export default function AdminNewsletter() {
                   {sendingTest ? "Sending…" : "Send Test Email"}
                 </button>
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-slate-500">
                 Sends a preview to this address only — not to all subscribers.
               </p>
             </div>
@@ -720,8 +726,7 @@ export default function AdminNewsletter() {
                 type="button"
                 onClick={handleSendClick}
                 disabled={sending !== null || sendingTest}
-                className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-md font-bold text-white shadow-sm hover:opacity-90 transition disabled:opacity-60"
-                style={{ backgroundColor: GOLD }}
+                className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-lg bg-teal text-teal-foreground font-bold shadow-sm hover:opacity-90 transition-opacity disabled:opacity-60"
               >
                 {sending === "send" ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -735,7 +740,7 @@ export default function AdminNewsletter() {
                 type="button"
                 onClick={() => submit(true)}
                 disabled={sending !== null || sendingTest}
-                className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-md font-semibold border-2 border-[#1E3A8A] text-[#1E3A8A] hover:bg-[#1E3A8A] hover:text-white transition disabled:opacity-60"
+                className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-lg border-2 border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-colors disabled:opacity-60"
               >
                 {sending === "draft" ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -753,32 +758,28 @@ export default function AdminNewsletter() {
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle style={{ color: NAVY }}>Confirm Campaign Send</DialogTitle>
+            <DialogTitle className="text-slate-900">Confirm Campaign Send</DialogTitle>
             <DialogDescription>
               You are about to send <strong>{campaignName || "this campaign"}</strong> to all
               subscribers. This cannot be undone.
             </DialogDescription>
           </DialogHeader>
-          <div
-            className="rounded-md border p-3 text-sm"
-            style={{ backgroundColor: "#FFF8E1", borderColor: "#F1D78A", color: "#7a5a00" }}
-          >
-            <strong>{total ?? 0}</strong> subscriber{(total ?? 0) === 1 ? "" : "s"} will receive this email.
+          <div className="rounded-lg border border-teal/30 bg-teal-soft p-3 text-sm text-teal">
+            <strong>{total ?? 0}</strong> subscriber{(total ?? 0) === 1 ? "" : "s"} will receive
+            this email.
           </div>
           <DialogFooter>
             <button
               type="button"
               onClick={() => setConfirmOpen(false)}
-              className="h-10 px-4 rounded-md border-2 font-semibold text-sm hover:bg-muted"
-              style={{ borderColor: NAVY, color: NAVY }}
+              className="h-11 px-5 rounded-lg border-2 border-slate-200 font-semibold text-sm text-slate-700 hover:bg-slate-50"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={confirmSend}
-              className="h-10 px-4 rounded-md font-bold text-white text-sm hover:opacity-90"
-              style={{ backgroundColor: GOLD }}
+              className="h-11 px-5 rounded-lg bg-teal text-teal-foreground font-bold text-sm hover:opacity-90"
             >
               Yes, Send Now
             </button>
@@ -799,15 +800,18 @@ function ToolbarBtn({
   label: string;
 }) {
   return (
-    <button
-      type="button"
-      title={label}
-      aria-label={label}
-      onClick={onClick}
-      className="h-8 w-8 inline-flex items-center justify-center rounded text-white hover:opacity-90"
-      style={{ backgroundColor: NAVY }}
-    >
-      {children}
-    </button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          aria-label={label}
+          onClick={onClick}
+          className="h-8 w-8 inline-flex items-center justify-center rounded-md text-slate-700 hover:bg-white hover:text-teal transition-colors"
+        >
+          {children}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
   );
 }
