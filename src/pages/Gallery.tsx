@@ -54,7 +54,7 @@ const GalleryCard = ({
 
       <img
         src={img.src}
-        alt={img.name}
+        alt="MESA KU event photo - Mechanical Engineering Students Association Kenyatta University"
         loading="lazy"
         onLoad={() => setLoaded(true)}
         className={`w-full aspect-square object-cover transition-all duration-500 ease-out
@@ -74,6 +74,10 @@ const GalleryCard = ({
 const Gallery = () => {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const touchStartX = useRef(0);
+
+  useEffect(() => {
+    document.title = "Gallery | MESA KU Events & Activities - Kenyatta University";
+  }, []);
 
   const closeLightbox = () => setLightboxIndex(null);
   const prev = useCallback(
@@ -134,7 +138,7 @@ const Gallery = () => {
             >
               <img
                 src={galleryImages[0].src}
-                alt={galleryImages[0].name}
+                alt="MESA KU event photo - Mechanical Engineering Students Association Kenyatta University"
                 className="w-full h-full object-cover animate-ken-burns"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -202,7 +206,7 @@ const Gallery = () => {
           </button>
           <img
             src={galleryImages[lightboxIndex].src}
-            alt={galleryImages[lightboxIndex].name}
+            alt="MESA KU event photo - Mechanical Engineering Students Association Kenyatta University"
             className="max-w-[90vw] max-h-[85vh] object-contain rounded-lg"
             onClick={(e) => e.stopPropagation()}
           />
