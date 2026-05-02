@@ -1,25 +1,240 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
   <head>
+    <!-- Basic -->
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/favicon.ico" />
-    <title>MESA KU — Mechanical Engineering Student Association</title>
-    <meta name="description" content="The official website of the Mechanical Engineering Student Association at Kenyatta University." />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+
+    <!-- Primary SEO -->
+    <title>MESA KU — Mechanical Engineering Students' Association, Kenyatta University</title>
+    <meta
+      name="title"
+      content="MESA KU — Mechanical Engineering Students' Association, Kenyatta University"
+    />
+    <meta
+      name="description"
+      content="Official website of the Mechanical Engineering Students' Association at Kenyatta University — events, projects, leadership, community, and opportunities for engineering students."
+    />
+    <meta
+      name="keywords"
+      content="MESA KU, Mechanical Engineering Students' Association, Kenyatta University, Mechanical Engineering, Engineering Students, KU Engineering, student association"
+    />
     <meta name="author" content="MESA KU" />
+    <meta name="creator" content="MESA KU" />
+    <meta name="publisher" content="MESA KU" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta name="format-detection" content="telephone=no, email=no, address=no" />
 
+    <!-- Canonical -->
+    <link rel="canonical" href="https://mesaku.org/" />
+
+    <!-- Theme -->
+    <meta name="theme-color" content="#01696f" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#171614" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
+
+    <!-- Icons -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/favicon.ico" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Open Graph -->
+    <meta property="og:locale" content="en_KE" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="MESA KU" />
-    <meta property="og:description" content="Join MESA at Kenyatta University — events, projects, and community for engineering students." />
+    <meta property="og:site_name" content="MESA KU" />
+    <meta
+      property="og:title"
+      content="MESA KU — Mechanical Engineering Students' Association, Kenyatta University"
+    />
+    <meta
+      property="og:description"
+      content="Join MESA at Kenyatta University for events, projects, leadership opportunities, and a strong mechanical engineering community."
+    />
+    <meta property="og:url" content="https://mesaku.org/" />
+    <meta property="og:image" content="https://mesaku.org/og-image.jpg" />
+    <meta property="og:image:alt" content="MESA KU official website preview" />
 
+    <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="MESA KU — Mechanical Engineering Student Association" />
-    <meta name="twitter:description" content="The official website of the Mechanical Engineering Student Association at Kenyatta University." />
+    <meta
+      name="twitter:title"
+      content="MESA KU — Mechanical Engineering Students' Association, Kenyatta University"
+    />
+    <meta
+      name="twitter:description"
+      content="Official website of MESA KU — events, projects, leadership, and community for mechanical engineering students."
+    />
+    <meta name="twitter:image" content="https://mesaku.org/og-image.jpg" />
+    <meta name="twitter:image:alt" content="MESA KU official website preview" />
+
+    <!-- PWA / App-like -->
+    <meta name="application-name" content="MESA KU" />
+    <meta name="apple-mobile-web-app-title" content="MESA KU" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "CollegeOrUniversity",
+        "name": "Mechanical Engineering Students' Association, Kenyatta University",
+        "alternateName": "MESA KU",
+        "url": "https://mesaku.org/",
+        "sameAs": [
+          "https://www.instagram.com/mesa__ku/",
+          "https://www.facebook.com/MesaKenyataUniversity/",
+          "https://www.linkedin.com/in/mesa-ku-kenyatta-university-653b81256"
+        ],
+        "parentOrganization": {
+          "@type": "CollegeOrUniversity",
+          "name": "Kenyatta University",
+          "url": "https://www.ku.ac.ke/"
+        },
+        "department": {
+          "@type": "EducationalOrganization",
+          "name": "Department of Mechanical Engineering"
+        },
+        "description": "The Mechanical Engineering Students' Association at Kenyatta University supports student engagement through events, projects, leadership, and professional development."
+      }
+    </script>
+
+    <!-- Optional: keep this tiny inline style so the page never flashes blank while React loads -->
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg-light: #f7f6f2;
+        --bg-dark: #171614;
+        --text-light: #28251d;
+        --text-dark: #cdccca;
+        --accent: #01696f;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: var(--bg-light);
+        color: var(--text-light);
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: var(--bg-dark);
+          color: var(--text-dark);
+        }
+      }
+
+      #root {
+        min-height: 100vh;
+      }
+
+      .app-loading {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 2rem;
+      }
+
+      .app-loading__inner {
+        text-align: center;
+        max-width: 32rem;
+      }
+
+      .app-loading__badge {
+        display: inline-block;
+        margin-bottom: 1rem;
+        padding: 0.45rem 0.8rem;
+        border-radius: 999px;
+        border: 1px solid rgba(1, 105, 111, 0.18);
+        background: rgba(1, 105, 111, 0.08);
+        color: var(--accent);
+        font-size: 0.875rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+
+      .app-loading__title {
+        margin: 0 0 0.75rem;
+        font-size: clamp(2rem, 4vw, 3.5rem);
+        line-height: 1.05;
+      }
+
+      .app-loading__text {
+        margin: 0 auto;
+        max-width: 38ch;
+        font-size: 1rem;
+        line-height: 1.6;
+        opacity: 0.8;
+      }
+
+      .no-js {
+        margin-top: 1rem;
+        font-size: 0.95rem;
+        opacity: 0.75;
+      }
+    </style>
   </head>
 
   <body>
-    <div id="root"></div>
+    <a
+      href="#root"
+      style="
+        position:absolute;
+        left:-9999px;
+        top:auto;
+        width:1px;
+        height:1px;
+        overflow:hidden;
+      "
+      onfocus="this.style.left='1rem';this.style.top='1rem';this.style.width='auto';this.style.height='auto';this.style.padding='0.75rem 1rem';this.style.background='#01696f';this.style.color='#fff';this.style.borderRadius='0.5rem';this.style.zIndex='9999';"
+      onblur="this.style.left='-9999px';this.style.width='1px';this.style.height='1px';this.style.padding='0';"
+    >
+      Skip to content
+    </a>
+
+    <div id="root" role="main" aria-live="polite">
+      <div class="app-loading">
+        <div class="app-loading__inner">
+          <div class="app-loading__badge">MESA KU</div>
+          <h1 class="app-loading__title">Mechanical Engineering Students' Association</h1>
+          <p class="app-loading__text">
+            Loading the official MESA KU website — events, projects, leadership, and community for students of mechanical engineering.
+          </p>
+          <noscript>
+            <p class="no-js">
+              This website requires JavaScript to run properly. Please enable JavaScript and reload the page.
+            </p>
+          </noscript>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const root = document.documentElement;
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        root.setAttribute("data-theme", prefersDark ? "dark" : "light");
+      })();
+    </script>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
