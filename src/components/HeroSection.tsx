@@ -23,10 +23,10 @@ const HeroSection = () => {
       
       <div className="relative z-10 container mx-auto px-6 pb-16">
         <h1 className="font-heading text-4xl md:text-6xl lg:text-7xl text-primary-foreground font-bold leading-tight max-w-3xl animate-fade-in-up">
-          Engineering Tomorrow's Solutions Today
+          Mechanical Engineering Students Association - Kenyatta University
         </h1>
         <p className="mt-4 text-primary-foreground/80 max-w-xl text-base md:text-lg leading-relaxed animate-fade-in-up animation-delay-200">
-          Join MESA at Kenyatta University and be part of a dynamic community of mechanical engineering students building skills, forging connections, and shaping the future.
+          MESA KU brings together mechanical engineering students at Kenyatta University through hands-on projects, industry workshops, engineering competitions, leadership development, and community events.
         </p>
         <button
           onClick={() => document.getElementById("events")?.scrollIntoView({ behavior: "smooth" })}
