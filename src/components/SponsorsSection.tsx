@@ -113,7 +113,7 @@ const SponsorsSection = () => {
                 {s.logoUrl ? (
                   <img
                     src={s.logoUrl}
-                    alt={s.name}
+                    alt={`${s.name} - MESA KU partner`}
                     className="h-20 w-32 object-contain"
                     style={{ filter: baseFilter, transition: "filter 0.3s ease" }}
                     onMouseEnter={(e) => (e.currentTarget.style.filter = "grayscale(0%)")}

@@ -58,7 +58,7 @@ const GallerySection = () => {
             >
               <img
                 src={img.src}
-                alt={img.name}
+                alt="MESA KU event photo - Mechanical Engineering Students Association Kenyatta University"
                 className="w-full aspect-square object-cover hover:scale-[1.02] transition-transform duration-500"
                 loading="lazy"
               />
@@ -112,7 +112,7 @@ const GallerySection = () => {
           </button>
           <img
             src={galleryImages[lightboxIndex].src}
-            alt={galleryImages[lightboxIndex].name}
+            alt="MESA KU event photo - Mechanical Engineering Students Association Kenyatta University"
             className="max-w-[90vw] max-h-[85vh] object-contain rounded-lg"
             onClick={(e) => e.stopPropagation()}
           />

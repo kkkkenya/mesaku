@@ -47,7 +47,7 @@ const Footer = () => {
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
           <div className="flex items-start gap-2">
-            <img src={mesaLogo} alt="MESA KU" className="h-10 w-auto" />
+            <img src={mesaLogo} alt="MESA KU - Mechanical Engineering Students Association Kenyatta University logo" className="h-10 w-auto" />
             <span className="font-heading text-xl font-bold text-navy">MESA</span>
           </div>
 

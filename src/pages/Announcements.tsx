@@ -24,6 +24,10 @@ const Announcements = () => {
   const [activeTag, setActiveTag] = useState<string>("All");
 
   useEffect(() => {
+    document.title = "News & Announcements | MESA KU - Kenyatta University";
+  }, []);
+
+  useEffect(() => {
     let mounted = true;
     (async () => {
       const { data, error } = await supabase

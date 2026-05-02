@@ -13,7 +13,8 @@ const HeroSection = () => {
     <section id="hero" className="relative h-[85vh] min-h-[600px] flex items-end overflow-hidden">
       <img
         src={heroBg}
-        alt="Engineering students at Kenyatta University"
+        alt=""
+        role="presentation"
         className="absolute inset-0 w-full h-full object-cover"
         width={1920}
         height={1080}

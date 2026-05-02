@@ -18,7 +18,7 @@ function ProductCard({ product }: { product: Merch }) {
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
       <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 mb-4">
         {product.image_url ? (
-          <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" loading="lazy" />
+          <img src={product.image_url} alt={`${product.name} - MESA KU official merchandise`} className="w-full h-full object-cover" loading="lazy" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">No image</div>
         )}

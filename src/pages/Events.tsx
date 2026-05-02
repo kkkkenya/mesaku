@@ -25,6 +25,10 @@ const Events = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    document.title = "Upcoming Events | MESA KU - Mechanical Engineering Students Association";
+  }, []);
+
+  useEffect(() => {
     supabase
       .from("events")
       .select("*")
@@ -82,7 +86,7 @@ const Events = () => {
                     {event.poster_url && (
                       <img
                         src={event.poster_url}
-                        alt={event.title}
+                        alt={`${event.title} - MESA KU event at Kenyatta University`}
                         className="w-full h-48 object-cover"
                         loading="lazy"
                       />

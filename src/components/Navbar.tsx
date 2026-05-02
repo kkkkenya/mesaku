@@ -156,7 +156,7 @@ const Navbar = () => {
           style={{ height: 56 }}
         >
           <Link to="/" className="flex items-center gap-2 pl-4 pr-2 shrink-0">
-            <img src={mesaLogo} alt="MESA KU Logo" className="h-9 w-auto" />
+            <img src={mesaLogo} alt="MESA KU - Mechanical Engineering Students Association Kenyatta University logo" className="h-9 w-auto" />
             <span className="hidden sm:inline text-sm font-semibold text-[#1E3A8A] font-heading">
               MESA KU
             </span>
@@ -171,7 +171,7 @@ const Navbar = () => {
       <div className="md:hidden fixed top-0 left-0 right-0 z-[60] bg-[#1a2e4a] shadow-md">
         <div className="h-16 flex items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
-            <img src={mesaLogo} alt="MESA KU Logo" className="h-9 w-auto" />
+            <img src={mesaLogo} alt="MESA KU - Mechanical Engineering Students Association Kenyatta University logo" className="h-9 w-auto" />
             <span className="text-base font-semibold text-white font-heading">MESA KU</span>
           </Link>
 
