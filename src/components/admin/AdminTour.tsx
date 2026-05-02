@@ -3,42 +3,56 @@ import { useEffect, useLayoutEffect, useState } from "react";
 const STORAGE_KEY = "mesa_admin_tour_complete";
 
 type Step = {
-  selector: string | null; // null = centered final modal
+  selector: string | null;
   title: string;
   body: string;
+  tip: string | null;
 };
 
 const STEPS: Step[] = [
   {
     selector: '[data-tour="sidebar"]',
-    title: "Welcome to MESA-KU Admin",
-    body: "👋 Use this sidebar to manage Events, Merchandise, Announcements, and the Newsletter.",
+    title: "Welcome to the MESA KU Admin Panel",
+    body: "This is your control centre. Everything on the public website — events, merchandise, announcements, and the newsletter — is managed from this sidebar. You'll spend most of your time here.",
+    tip: "Changes you make here are reflected on the live site at mesa.co.ke immediately after saving.",
   },
   {
     selector: '[data-tour="nav-events"]',
-    title: "Events",
-    body: "📅 Create and manage MESA events here. Set dates, descriptions, and publish or unpublish them at any time.",
+    title: "Managing Events",
+    body: "Create, edit, and publish MESA KU events here. Each event has a title, description, date, time, location, cover photo, and a Google Form URL for RSVPs. Unpublished events are saved as drafts and won't appear on the public site.",
+    tip: "Always set the correct date and time — the public site uses these to generate the 'Add to Google Calendar' link automatically.",
   },
   {
     selector: '[data-tour="nav-merchandise"]',
-    title: "Merchandise",
-    body: "🛍️ Add and manage MESA branded items. Set prices, stock status, and product images.",
+    title: "Managing Merchandise",
+    body: "Add and manage MESA KU branded items. Each product has a name, price (KSh), description, available sizes, and a product image. Orders are handled via WhatsApp — the site pre-fills the message automatically using the product name and size the customer selects.",
+    tip: "Upload a real product photo as soon as one is available. The placeholder improves significantly with an actual image.",
   },
   {
     selector: '[data-tour="nav-announcements"]',
-    title: "Announcements",
-    body: "📢 Post updates and news for MESA members. Use tags to categorize and set a publish date.",
+    title: "Posting Announcements",
+    body: "Post news, updates, and notices for MESA KU members. Each announcement has a title, description, tag (Announcement / Event / News / Update), and a date. Use the Published toggle to control what appears on the homepage.",
+    tip: "The homepage only shows the 3 most recent published announcements. Older ones are visible on the full /announcements page.",
   },
   {
     selector: '[data-tour="nav-newsletter"]',
-    title: "Newsletter",
-    body: "✉️ View subscribers and send email campaigns through Mailchimp. Always send a test email before broadcasting!",
+    title: "Newsletter & Subscribers",
+    body: "View everyone who has subscribed via the homepage newsletter form. From here you can see subscriber emails and send campaign updates. If Mailchimp is connected, you can broadcast directly — always send yourself a test email first.",
+    tip: "Subscribers signed up to hear from MESA KU specifically. Keep emails relevant — events, announcements, and opportunities only.",
   },
   {
     selector: null,
-    title: "✅ You're all set!",
-    body: "You now know your way around the MESA-KU Admin Panel. Go ahead and explore.",
+    title: "You're ready to go.",
+    body: null,
+    tip: null,
   },
+];
+
+const FINAL_QUICK_REF = [
+  { icon: "📅", label: "Events", desc: "Create & publish events" },
+  { icon: "🛍️", label: "Merch", desc: "Manage products & prices" },
+  { icon: "📢", label: "Announcements", desc: "Post news & updates" },
+  { icon: "✉️", label: "Newsletter", desc: "View subscribers & send" },
 ];
 
 interface Props {
@@ -52,38 +66,45 @@ export default function AdminTour({ open, onClose }: Props) {
   const [step, setStep] = useState(0);
   const [rect, setRect] = useState<Rect | null>(null);
   const [animKey, setAnimKey] = useState(0);
+  const [direction, setDirection] = useState<"forward" | "back">("forward");
 
   useEffect(() => {
-    if (open) setStep(0);
+    if (open) { setStep(0); setDirection("forward"); }
   }, [open]);
 
   const current = STEPS[step];
   const isFinal = current?.selector === null;
+  const isFirst = step === 0;
+  const totalSteps = STEPS.length - 1; // exclude final screen
+
+  // Keyboard navigation
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") finish();
+      if (e.key === "ArrowRight" || e.key === "Enter") handleNext();
+      if (e.key === "ArrowLeft" && !isFirst) handleBack();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [open, step, isFirst]);
 
   useLayoutEffect(() => {
     if (!open) return;
     setAnimKey((k) => k + 1);
-
-    if (isFinal) {
-      setRect(null);
-      return;
-    }
-
+    if (isFinal) { setRect(null); return; }
     const measure = () => {
       const el = current?.selector
         ? (document.querySelector(current.selector) as HTMLElement | null)
         : null;
-      if (!el) {
-        setRect(null);
-        return;
-      }
+      if (!el) { setRect(null); return; }
       const r = el.getBoundingClientRect();
       setRect({ top: r.top, left: r.left, width: r.width, height: r.height });
     };
     measure();
     window.addEventListener("resize", measure);
     window.addEventListener("scroll", measure, true);
-    const id = setInterval(measure, 250); // re-measure if drawer animates in
+    const id = setInterval(measure, 250);
     return () => {
       window.removeEventListener("resize", measure);
       window.removeEventListener("scroll", measure, true);
@@ -97,21 +118,25 @@ export default function AdminTour({ open, onClose }: Props) {
     localStorage.setItem(STORAGE_KEY, "true");
     onClose();
   };
-  const next = () => {
+
+  const handleNext = () => {
+    setDirection("forward");
     if (step >= STEPS.length - 1) finish();
     else setStep((s) => s + 1);
   };
 
+  const handleBack = () => {
+    if (step === 0) return;
+    setDirection("back");
+    setStep((s) => s - 1);
+  };
+
   // Tooltip placement
-  const PADDING = 12;
-  const TOOLTIP_W = 300;
+  const PADDING = 16;
+  const TOOLTIP_W = 320;
   let tipStyle: React.CSSProperties = {};
   if (isFinal || !rect) {
-    tipStyle = {
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-    };
+    tipStyle = { top: "50%", left: "50%", transform: "translate(-50%, -50%)" };
   } else {
     const vw = window.innerWidth;
     const placeRight = rect.left + rect.width + PADDING + TOOLTIP_W < vw - 16;
@@ -121,7 +146,6 @@ export default function AdminTour({ open, onClose }: Props) {
         left: rect.left + rect.width + PADDING,
       };
     } else {
-      // place below
       tipStyle = {
         top: rect.top + rect.height + PADDING,
         left: Math.min(Math.max(16, rect.left), vw - TOOLTIP_W - 16),
@@ -131,10 +155,9 @@ export default function AdminTour({ open, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-[9998] pointer-events-none">
-      {/* Spotlight overlay using SVG mask */}
+      {/* Spotlight overlay */}
       <svg
-        className="absolute inset-0 w-full h-full pointer-events-auto"
-        onClick={() => {}}
+        className="absolute inset-0 w-full h-full"
         style={{ pointerEvents: "auto" }}
       >
         <defs>
@@ -142,10 +165,10 @@ export default function AdminTour({ open, onClose }: Props) {
             <rect width="100%" height="100%" fill="white" />
             {rect && !isFinal && (
               <rect
-                x={rect.left - 6}
-                y={rect.top - 6}
-                width={rect.width + 12}
-                height={rect.height + 12}
+                x={rect.left - 8}
+                y={rect.top - 8}
+                width={rect.width + 16}
+                height={rect.height + 16}
                 rx="10"
                 fill="black"
               />
@@ -155,83 +178,183 @@ export default function AdminTour({ open, onClose }: Props) {
         <rect
           width="100%"
           height="100%"
-          fill="rgba(15,23,42,0.72)"
+          fill="rgba(10,18,36,0.78)"
           mask="url(#tour-mask)"
         />
         {rect && !isFinal && (
           <rect
-            x={rect.left - 6}
-            y={rect.top - 6}
-            width={rect.width + 12}
-            height={rect.height + 12}
+            x={rect.left - 8}
+            y={rect.top - 8}
+            width={rect.width + 16}
+            height={rect.height + 16}
             rx="10"
             fill="none"
-            stroke="hsl(var(--teal))"
+            stroke="#D4A017"
             strokeWidth="2"
+            strokeDasharray="6 3"
           />
         )}
       </svg>
 
       {/* Tooltip card */}
       <div
-        key={animKey}
-        className="absolute pointer-events-auto w-[300px] rounded-xl bg-white shadow-lg p-5 animate-tour-in"
-        style={tipStyle}
+        key={`${animKey}-${direction}`}
+        className="absolute pointer-events-auto rounded-xl bg-white shadow-2xl animate-tour-in"
+        style={{ ...tipStyle, width: TOOLTIP_W }}
         role="dialog"
         aria-modal="true"
         aria-labelledby="tour-title"
       >
-        <p className="text-xs font-semibold text-teal mb-2">
-          {isFinal ? "Tour complete" : `Step ${step + 1} of ${STEPS.length - 1}`}
-        </p>
-        <h3 id="tour-title" className="font-bold text-slate-900 text-base mb-1">
-          {current.title}
-        </h3>
-        <p className="text-sm text-slate-600 leading-relaxed">{current.body}</p>
+        {!isFinal ? (
+          <>
+            {/* Header bar */}
+            <div className="px-5 pt-4 pb-3 border-b border-slate-100">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-bold tracking-widest uppercase text-[#D4A017]">
+                  MESA KU Admin Tour
+                </span>
+                <button
+                  type="button"
+                  onClick={finish}
+                  className="text-[11px] text-slate-400 hover:text-slate-700 transition-colors"
+                >
+                  Skip tour ×
+                </button>
+              </div>
 
-        <div className="mt-5 flex items-center justify-between gap-3">
-          {!isFinal ? (
-            <>
+              {/* Progress dots */}
+              <div className="flex items-center gap-1.5">
+                {Array.from({ length: totalSteps }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-1.5 rounded-full transition-all duration-300"
+                    style={{
+                      width: i === step ? 20 : 6,
+                      background: i < step ? "#1E3A8A" : i === step ? "#D4A017" : "#e2e8f0",
+                    }}
+                  />
+                ))}
+                <span className="ml-auto text-[11px] text-slate-400 font-medium">
+                  {step + 1} / {totalSteps}
+                </span>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="px-5 py-4">
+              <h3
+                id="tour-title"
+                className="font-bold text-slate-900 text-[15px] mb-2 leading-snug"
+              >
+                {current.title}
+              </h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                {current.body}
+              </p>
+
+              {current.tip && (
+                <div className="mt-3 flex gap-2 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2.5">
+                  <span className="text-base leading-none mt-0.5">💡</span>
+                  <p className="text-xs text-amber-800 leading-relaxed">{current.tip}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="px-5 pb-4 flex items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={handleBack}
+                disabled={isFirst}
+                className="h-9 px-4 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                ← Back
+              </button>
+              <button
+                type="button"
+                onClick={handleNext}
+                className="h-9 px-5 rounded-lg text-sm font-semibold transition-opacity"
+                style={{ background: "#1E3A8A", color: "white" }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "#D4A017")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "#1E3A8A")}
+              >
+                {step === totalSteps - 1 ? "Finish tour →" : "Next →"}
+              </button>
+            </div>
+
+            {/* Keyboard hint */}
+            <p className="text-center text-[10px] text-slate-300 pb-2">
+              ← → arrow keys to navigate · Esc to skip
+            </p>
+          </>
+        ) : (
+          /* ── Final screen ── */
+          <>
+            <div className="px-5 pt-5 pb-4 text-center border-b border-slate-100">
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center text-2xl mx-auto mb-3"
+                style={{ background: "#f0f9f4" }}
+              >
+                ✅
+              </div>
+              <h3 className="font-bold text-slate-900 text-base mb-1">
+                You're all set!
+              </h3>
+              <p className="text-sm text-slate-500">
+                Here's a quick reference for everything you just learned.
+              </p>
+            </div>
+
+            {/* Quick reference grid */}
+            <div className="grid grid-cols-2 gap-2 p-4">
+              {FINAL_QUICK_REF.map((item) => (
+                <div
+                  key={item.label}
+                  className="rounded-lg border border-slate-100 p-3"
+                  style={{ background: "#f8fafc" }}
+                >
+                  <div className="text-lg mb-1">{item.icon}</div>
+                  <p className="text-xs font-bold text-slate-800">{item.label}</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="px-4 pb-4 flex flex-col gap-2">
               <button
                 type="button"
                 onClick={finish}
-                className="text-xs font-medium text-slate-500 hover:text-slate-800 transition-colors"
+                className="w-full h-10 rounded-lg text-sm font-bold text-white transition-opacity hover:opacity-90"
+                style={{ background: "#1E3A8A" }}
               >
-                Skip tour
+                Go to dashboard →
               </button>
               <button
                 type="button"
-                onClick={next}
-                className="inline-flex items-center gap-1 h-9 px-4 rounded-lg bg-teal text-teal-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
+                onClick={() => { setStep(0); setDirection("forward"); }}
+                className="w-full h-8 rounded-lg text-xs font-medium text-slate-400 hover:text-slate-700 transition-colors"
               >
-                Next →
+                Replay tour from the start
               </button>
-            </>
-          ) : (
-            <button
-              type="button"
-              onClick={finish}
-              className="ml-auto inline-flex items-center gap-1 h-10 px-5 rounded-lg bg-teal text-teal-foreground text-sm font-semibold hover:opacity-90 transition-opacity"
-            >
-              Let's Go →
-            </button>
-          )}
-        </div>
+            </div>
+          </>
+        )}
       </div>
 
       <style>{`
         @keyframes tour-in {
-          from { opacity: 0; transform: translateY(8px) scale(0.98); }
+          from { opacity: 0; transform: translateY(6px) scale(0.97); }
           to   { opacity: 1; transform: translateY(0) scale(1); }
         }
-        .animate-tour-in { animation: tour-in 0.28s ease-out both; }
+        .animate-tour-in { animation: tour-in 0.22s ease-out both; }
       `}</style>
     </div>
   );
 }
 
 export function shouldShowTour() {
-  return typeof window !== "undefined" && localStorage.getItem(STORAGE_KEY) !== "true";
+  return typeof window !== "undefined" &&
+    localStorage.getItem(STORAGE_KEY) !== "true";
 }
 
 export function resetTour() {
