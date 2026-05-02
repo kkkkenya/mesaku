@@ -11,12 +11,18 @@ const GallerySection = () => {
 
   const closeLightbox = () => setLightboxIndex(null);
   const prev = useCallback(
-    () => setLightboxIndex((i) => (i !== null ? (i - 1 + galleryImages.length) % galleryImages.length : null)),
-    [],
+    () =>
+      setLightboxIndex((i) =>
+        i !== null ? (i - 1 + galleryImages.length) % galleryImages.length : null
+      ),
+    []
   );
   const next = useCallback(
-    () => setLightboxIndex((i) => (i !== null ? (i + 1) % galleryImages.length : null)),
-    [],
+    () =>
+      setLightboxIndex((i) =>
+        i !== null ? (i + 1) % galleryImages.length : null
+      ),
+    []
   );
 
   useEffect(() => {
@@ -44,7 +50,7 @@ const GallerySection = () => {
     <section id="gallery" className="py-12 md:py-20 bg-white" ref={ref}>
       <div className="max-w-6xl mx-auto px-4 md:px-8">
 
-        {/* ── Heading block — only thing changed ── */}
+        {/* Heading */}
         <div className={`mb-10 md:mb-12 ${inView ? "animate-fade-in-up" : "opacity-0"}`}>
           <p className="text-xs font-semibold tracking-widest text-[#D4A017] uppercase mb-2">
             Gallery
@@ -53,16 +59,22 @@ const GallerySection = () => {
             Our Work, Our People, Our Slightly Blurry Photos
           </h2>
           <p className="mt-3 max-w-2xl text-sm md:text-base text-muted-foreground">
-            A growing collection of MESA KU moments — from the polished to the candid.
-            No stock photos. No staging. Just real MESA KU students at Kenyatta University.
+            A growing collection of MESA KU moments — from the polished to the
+            candid. No stock photos. No staging. Just real MESA KU students at
+            Kenyatta University.
           </p>
         </div>
 
+        {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
           {galleryImages.map((img, i) => (
             <div
               key={img.name}
-              className={`overflow-hidden rounded-lg cursor-pointer ${inView ? `animate-scale-in animation-delay-${((i % 6) + 1) * 100}` : "opacity-0"}`}
+              className={`overflow-hidden rounded-lg cursor-pointer ${
+                inView
+                  ? `animate-scale-in animation-delay-${((i % 6) + 1) * 100}`
+                  : "opacity-0"
+              }`}
               onClick={() => setLightboxIndex(i)}
             >
               <img
@@ -75,6 +87,7 @@ const GallerySection = () => {
           ))}
         </div>
 
+        {/* Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mt-10">
           <Link
             to="/gallery"
@@ -86,9 +99,10 @@ const GallerySection = () => {
             href={DRIVE_FOLDER_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 border-[1.5px] border-[#1E3A8A] text-[#1E3A8A] bg-white px-6 h-12 rounded-lg text-base font-medium hover:bg-[#1E3A8A]/5 transition-colors"
+            className="inline-flex items-center gap-2 border border-[#1E3A8A] text-[#1E3A8A] bg-white px-6 h-12 rounded-lg text-base font-medium hover:bg-blue-50 transition-colors"
           >
-            View on Google Drive <ExternalLink size={16} />
+            View on Google Drive
+            <ExternalLink size={16} />
           </a>
         </div>
       </div>
@@ -102,19 +116,28 @@ const GallerySection = () => {
           onTouchEnd={handleTouchEnd}
         >
           <button
-            onClick={(e) => { e.stopPropagation(); closeLightbox(); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              closeLightbox();
+            }}
             className="absolute top-4 right-4 text-white z-10"
           >
             <X size={28} />
           </button>
           <button
-            onClick={(e) => { e.stopPropagation(); prev(); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              prev();
+            }}
             className="absolute left-4 text-white z-10 p-2"
           >
             <ChevronLeft size={32} />
           </button>
           <button
-            onClick={(e) => { e.stopPropagation(); next(); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              next();
+            }}
             className="absolute right-4 text-white z-10 p-2"
           >
             <ChevronRight size={32} />
