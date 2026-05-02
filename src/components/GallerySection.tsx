@@ -43,11 +43,20 @@ const GallerySection = () => {
   return (
     <section id="gallery" className="py-12 md:py-20 bg-white" ref={ref}>
       <div className="max-w-6xl mx-auto px-4 md:px-8">
-        <h2
-          className={`font-heading text-2xl md:text-3xl lg:text-4xl font-bold text-navy mb-12 ${inView ? "animate-fade-in-up" : "opacity-0"}`}
-        >
-          Gallery
-        </h2>
+
+        {/* ── Heading block — only thing changed ── */}
+        <div className={`mb-10 md:mb-12 ${inView ? "animate-fade-in-up" : "opacity-0"}`}>
+          <p className="text-xs font-semibold tracking-widest text-[#D4A017] uppercase mb-2">
+            Gallery
+          </p>
+          <h2 className="font-heading text-2xl md:text-3xl lg:text-4xl font-bold text-navy">
+            Our Work, Our People, Our Slightly Blurry Photos
+          </h2>
+          <p className="mt-3 max-w-2xl text-sm md:text-base text-muted-foreground">
+            A growing collection of MESA KU moments — from the polished to the candid.
+            No stock photos. No staging. Just real MESA KU students at Kenyatta University.
+          </p>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
           {galleryImages.map((img, i) => (
@@ -73,7 +82,7 @@ const GallerySection = () => {
           >
             View All Photos
           </Link>
-          <a
+          
             href={DRIVE_FOLDER_URL}
             target="_blank"
             rel="noopener noreferrer"
