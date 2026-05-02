@@ -51,7 +51,7 @@ const EventsSection = () => {
     <section id="events" className="py-12 md:py-20 bg-gray-50" ref={ref}>
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         <h2 className={`font-heading text-2xl md:text-3xl lg:text-4xl font-bold text-navy mb-12 ${inView ? "animate-fade-in-up" : "opacity-0"}`}>
-          Upcoming Events
+          From workshops and industrial visits to design competitions and community activities — here is what MESA KU has coming up.
         </h2>
 
         {loading ? (
