@@ -72,7 +72,7 @@ const EventsSection = () => {
                   }`}
                 >
                   {event.poster_url && (
-                    <img src={event.poster_url} alt={event.title} className="w-full h-48 object-cover" loading="lazy" />
+                    <img src={event.poster_url} alt={`${event.title} - MESA KU event at Kenyatta University`} className="w-full h-48 object-cover" loading="lazy" />
                   )}
                   <div className="p-5 flex flex-col flex-1">
                     {/* Title */}

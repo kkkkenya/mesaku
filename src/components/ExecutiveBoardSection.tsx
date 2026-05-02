@@ -60,7 +60,7 @@ function MemberCard({
       {image ? (
         <img
           src={image}
-          alt={`${name} — ${role}`}
+          alt={`${name} - ${role}, MESA KU`}
           width={400}
           height={533}
           loading="eager"

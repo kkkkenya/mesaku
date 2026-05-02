@@ -25,6 +25,10 @@ const Events = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    document.title = "Upcoming Events | MESA KU - Mechanical Engineering Students Association";
+  }, []);
+
+  useEffect(() => {
     supabase
       .from("events")
       .select("*")
