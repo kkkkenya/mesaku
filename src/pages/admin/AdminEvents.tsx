@@ -254,74 +254,81 @@ export default function AdminEvents() {
           {events.map((ev) => (
             <div
               key={ev.id}
-              className="flex items-center gap-4 p-4 bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow"
+              className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow"
             >
-              {ev.poster_url && (
-                <img
-                  src={ev.poster_url}
-                  alt=""
-                  className="h-16 w-16 object-cover rounded-lg shrink-0"
-                />
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold truncate text-slate-900">{ev.title}</p>
-                <p className="text-sm text-slate-500">
-                  {ev.event_date ? new Date(ev.event_date).toLocaleDateString() : "No date"} ·{" "}
-                  {ev.venue || "No venue"}
-                </p>
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                {ev.poster_url && (
+                  <img
+                    src={ev.poster_url}
+                    alt=""
+                    className="h-14 w-14 sm:h-16 sm:w-16 object-cover rounded-lg shrink-0"
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold truncate text-slate-900">{ev.title}</p>
+                  <p className="text-sm text-slate-500 truncate">
+                    {ev.event_date ? new Date(ev.event_date).toLocaleDateString() : "No date"} ·{" "}
+                    {ev.venue || "No venue"}
+                  </p>
+                </div>
               </div>
-              <span
-                className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                  ev.status === "published"
-                    ? "bg-teal text-teal-foreground"
-                    : "bg-slate-200 text-slate-700"
-                }`}
-              >
-                {ev.status}
-              </span>
-              <div className="flex gap-1">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => toggleStatus(ev)}
-                      className="p-2 rounded-md hover:bg-slate-100 text-slate-600"
-                    >
-                      {ev.status === "published" ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {ev.status === "published" ? "Unpublish" : "Publish"}
-                  </TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => {
-                        setEditing(ev);
-                        setPosterFile(null);
-                      }}
-                      className="p-2 rounded-md hover:bg-slate-100 text-slate-600"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>Edit</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => remove(ev.id)}
-                      className="p-2 rounded-md hover:bg-red-50 text-red-600"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>Delete</TooltipContent>
-                </Tooltip>
+              <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+                <span
+                  className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                    ev.status === "published"
+                      ? "bg-teal text-teal-foreground"
+                      : "bg-slate-200 text-slate-700"
+                  }`}
+                >
+                  {ev.status}
+                </span>
+                <div className="flex gap-1">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => toggleStatus(ev)}
+                        aria-label={ev.status === "published" ? "Unpublish" : "Publish"}
+                        className="h-10 w-10 inline-flex items-center justify-center rounded-md hover:bg-slate-100 text-slate-600"
+                      >
+                        {ev.status === "published" ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {ev.status === "published" ? "Unpublish" : "Publish"}
+                    </TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => {
+                          setEditing(ev);
+                          setPosterFile(null);
+                        }}
+                        aria-label="Edit"
+                        className="h-10 w-10 inline-flex items-center justify-center rounded-md hover:bg-slate-100 text-slate-600"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>Edit</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => remove(ev.id)}
+                        aria-label="Delete"
+                        className="h-10 w-10 inline-flex items-center justify-center rounded-md hover:bg-red-50 text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>Delete</TooltipContent>
+                  </Tooltip>
+                </div>
               </div>
             </div>
           ))}
