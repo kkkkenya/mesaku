@@ -69,6 +69,7 @@ export default function AdminTour({ open, onClose }: Props) {
   const [rect, setRect] = useState<Rect | null>(null);
   const [animKey, setAnimKey] = useState(0);
   const [direction, setDirection] = useState<"forward" | "back">("forward");
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (open) { setStep(0); setDirection("forward"); }
