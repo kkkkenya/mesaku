@@ -138,7 +138,10 @@ export default function AdminTour({ open, onClose }: Props) {
   const PADDING = 16;
   const TOOLTIP_W = 320;
   let tipStyle: React.CSSProperties = {};
-  if (isFinal || !rect) {
+  if (isMobile) {
+    // Bottom sheet on mobile — full width, anchored to bottom
+    tipStyle = { left: 12, right: 12, bottom: 12, width: "auto" };
+  } else if (isFinal || !rect) {
     tipStyle = { top: "50%", left: "50%", transform: "translate(-50%, -50%)" };
   } else {
     const vw = window.innerWidth;
