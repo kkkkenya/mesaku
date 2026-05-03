@@ -29,7 +29,7 @@ export default function AdminPageHeader({ title, subtitle, breadcrumb, action }:
             <p className="mt-1 text-sm text-slate-500 max-w-2xl">{subtitle}</p>
           )}
         </div>
-        {action && <div className="shrink-0">{action}</div>}
+        {action && <div className="shrink-0 w-full sm:w-auto [&>*]:w-full sm:[&>*]:w-auto">{action}</div>}
       </div>
     </div>
   );

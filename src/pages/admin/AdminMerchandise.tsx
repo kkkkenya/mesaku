@@ -267,73 +267,80 @@ export default function AdminMerchandise() {
           {items.map((item) => (
             <div
               key={item.id}
-              className="flex items-center gap-4 p-4 bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow"
+              className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow"
             >
-              {item.image_url && (
-                <img
-                  src={item.image_url}
-                  alt=""
-                  className="h-16 w-16 object-cover rounded-lg shrink-0"
-                />
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold truncate text-slate-900">{item.name}</p>
-                <p className="text-sm text-slate-500">
-                  KSh {item.price?.toLocaleString() ?? "—"} · {item.stock_status}
-                </p>
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+                {item.image_url && (
+                  <img
+                    src={item.image_url}
+                    alt=""
+                    className="h-14 w-14 sm:h-16 sm:w-16 object-cover rounded-lg shrink-0"
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold truncate text-slate-900">{item.name}</p>
+                  <p className="text-sm text-slate-500 truncate">
+                    KSh {item.price?.toLocaleString() ?? "—"} · {item.stock_status}
+                  </p>
+                </div>
               </div>
-              <span
-                className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                  item.status === "published"
-                    ? "bg-teal text-teal-foreground"
-                    : "bg-slate-200 text-slate-700"
-                }`}
-              >
-                {item.status}
-              </span>
-              <div className="flex gap-1">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => toggleStatus(item)}
-                      className="p-2 rounded-md hover:bg-slate-100 text-slate-600"
-                    >
-                      {item.status === "published" ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    {item.status === "published" ? "Unpublish" : "Publish"}
-                  </TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => {
-                        setEditing(item);
-                        setImageFile(null);
-                      }}
-                      className="p-2 rounded-md hover:bg-slate-100 text-slate-600"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>Edit</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => remove(item.id)}
-                      className="p-2 rounded-md hover:bg-red-50 text-red-600"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>Delete</TooltipContent>
-                </Tooltip>
+              <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+                <span
+                  className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                    item.status === "published"
+                      ? "bg-teal text-teal-foreground"
+                      : "bg-slate-200 text-slate-700"
+                  }`}
+                >
+                  {item.status}
+                </span>
+                <div className="flex gap-1">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => toggleStatus(item)}
+                        aria-label={item.status === "published" ? "Unpublish" : "Publish"}
+                        className="h-10 w-10 inline-flex items-center justify-center rounded-md hover:bg-slate-100 text-slate-600"
+                      >
+                        {item.status === "published" ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {item.status === "published" ? "Unpublish" : "Publish"}
+                    </TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => {
+                          setEditing(item);
+                          setImageFile(null);
+                        }}
+                        aria-label="Edit"
+                        className="h-10 w-10 inline-flex items-center justify-center rounded-md hover:bg-slate-100 text-slate-600"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>Edit</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => remove(item.id)}
+                        aria-label="Delete"
+                        className="h-10 w-10 inline-flex items-center justify-center rounded-md hover:bg-red-50 text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>Delete</TooltipContent>
+                  </Tooltip>
+                </div>
               </div>
             </div>
           ))}
