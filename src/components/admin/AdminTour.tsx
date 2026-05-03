@@ -1,4 +1,6 @@
 import { useEffect, useLayoutEffect, useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
+
 
 const STORAGE_KEY = "mesa_admin_tour_complete";
 
