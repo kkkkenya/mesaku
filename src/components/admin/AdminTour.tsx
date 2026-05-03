@@ -205,8 +205,8 @@ export default function AdminTour({ open, onClose }: Props) {
       {/* Tooltip card */}
       <div
         key={`${animKey}-${direction}`}
-        className="absolute pointer-events-auto rounded-xl bg-white shadow-2xl animate-tour-in"
-        style={{ ...tipStyle, width: TOOLTIP_W }}
+        className="absolute pointer-events-auto rounded-2xl sm:rounded-xl bg-white shadow-2xl animate-tour-in max-h-[85vh] overflow-y-auto"
+        style={isMobile ? tipStyle : { ...tipStyle, width: TOOLTIP_W }}
         role="dialog"
         aria-modal="true"
         aria-labelledby="tour-title"
