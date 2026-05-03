@@ -247,21 +247,21 @@ export default function AdminTour({ open, onClose }: Props) {
             </div>
 
             {/* Body */}
-            <div className="px-5 py-4">
+            <div className="px-5 py-4 sm:py-4">
               <h3
                 id="tour-title"
-                className="font-bold text-slate-900 text-[15px] mb-2 leading-snug"
+                className="font-bold text-slate-900 text-base sm:text-[15px] mb-2 leading-snug"
               >
                 {current.title}
               </h3>
-              <p className="text-sm text-slate-600 leading-relaxed">
+              <p className="text-[15px] sm:text-sm text-slate-600 leading-relaxed">
                 {current.body}
               </p>
 
               {current.tip && (
-                <div className="mt-3 flex gap-2 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2.5">
-                  <span className="text-base leading-none mt-0.5">💡</span>
-                  <p className="text-xs text-amber-800 leading-relaxed">{current.tip}</p>
+                <div className="mt-4 flex gap-2.5 bg-amber-50 border border-amber-100 rounded-lg px-3.5 py-3">
+                  <span className="text-base leading-none mt-0.5 shrink-0">💡</span>
+                  <p className="text-[13px] sm:text-xs text-amber-900 leading-relaxed">{current.tip}</p>
                 </div>
               )}
             </div>
@@ -272,14 +272,14 @@ export default function AdminTour({ open, onClose }: Props) {
                 type="button"
                 onClick={handleBack}
                 disabled={isFirst}
-                className="h-9 px-4 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="h-11 sm:h-9 px-4 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 ← Back
               </button>
               <button
                 type="button"
                 onClick={handleNext}
-                className="h-9 px-5 rounded-lg text-sm font-semibold transition-opacity"
+                className="h-11 sm:h-9 px-5 rounded-lg text-sm font-semibold transition-opacity flex-1 sm:flex-none"
                 style={{ background: "#1E3A8A", color: "white" }}
                 onMouseEnter={(e) => (e.currentTarget.style.background = "#D4A017")}
                 onMouseLeave={(e) => (e.currentTarget.style.background = "#1E3A8A")}
@@ -289,7 +289,7 @@ export default function AdminTour({ open, onClose }: Props) {
             </div>
 
             {/* Keyboard hint */}
-            <p className="text-center text-[10px] text-slate-300 pb-2">
+            <p className="hidden sm:block text-center text-[10px] text-slate-300 pb-2">
               ← → arrow keys to navigate · Esc to skip
             </p>
           </>
