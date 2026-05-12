@@ -297,7 +297,8 @@ const Navbar = () => {
                 }}
               />
             </div>
-          </button>
+            </button>
+          </div>
         </div>
       </div>
 
