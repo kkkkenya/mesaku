@@ -64,6 +64,58 @@
     --teal-foreground: 0 0% 100%;
     --teal-soft: 167 76% 95%;
   }
+
+  :root,
+  [data-theme="light"] {
+    --color-bg: #f7f6f2;
+    --color-surface: #f9f8f5;
+    --color-surface-2: #fbfbf9;
+    --color-border: #d4d1ca;
+    --color-text: #28251d;
+    --color-text-muted: #7a7974;
+    --color-text-faint: #bab9b4;
+    --color-primary: #01696f;
+    --color-primary-hover: #0c4e54;
+    --shadow-md: 0 4px 12px oklch(0.2 0.01 80 / 0.08);
+  }
+
+  [data-theme="dark"] {
+    --color-bg: #171614;
+    --color-surface: #1c1b19;
+    --color-surface-2: #201f1d;
+    --color-border: #393836;
+    --color-text: #cdccca;
+    --color-text-muted: #797876;
+    --color-text-faint: #5a5957;
+    --color-primary: #4f98a3;
+    --color-primary-hover: #227f8b;
+    --shadow-md: 0 4px 12px oklch(0 0 0 / 0.3);
+
+    /* Map existing semantic HSL tokens to dark equivalents so the whole site themes */
+    --background: 30 7% 9%;
+    --foreground: 60 2% 80%;
+    --card: 36 6% 11%;
+    --card-foreground: 60 2% 80%;
+    --popover: 36 6% 11%;
+    --popover-foreground: 60 2% 80%;
+    --primary: 187 35% 47%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 4% 18%;
+    --secondary-foreground: 60 2% 80%;
+    --muted: 36 5% 14%;
+    --muted-foreground: 30 1% 47%;
+    --accent: 36 5% 14%;
+    --accent-foreground: 60 2% 80%;
+    --navy: 30 7% 9%;
+    --navy-foreground: 60 2% 80%;
+    --surface: 36 6% 12%;
+    --surface-foreground: 60 2% 80%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 30 2% 22%;
+    --input: 30 2% 22%;
+    --ring: 187 35% 47%;
+  }
 }
 
 @layer base {
@@ -73,8 +125,22 @@
   body {
     @apply bg-background text-foreground font-body;
   }
+  /* Smooth color transitions only after hydration (avoids initial flash) */
+  body.theme-ready,
+  body.theme-ready * {
+    transition: background-color 300ms ease, border-color 300ms ease, color 300ms ease;
+  }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
+  }
+
+  /* Logo swap helpers */
+  [data-theme="dark"] .logo-light { display: none; }
+  [data-theme="light"] .logo-dark { display: none; }
+
+  /* Soften decorative imagery in dark mode */
+  [data-theme="dark"] img:not(.logo):not([data-no-dim]) {
+    opacity: 0.88;
   }
 }
 
