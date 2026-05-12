@@ -223,9 +223,12 @@ const Navbar = () => {
               MESA KU
             </span>
           </Link>
-          <nav className="flex items-center gap-6 px-4 pr-6">
+          <nav className="flex items-center gap-6 px-4">
             {navItems.map((item) => renderDesktopLink(item))}
           </nav>
+          <div className="pr-3 pl-1 flex items-center">
+            <ThemeToggle className="text-[#1E3A8A]" />
+          </div>
         </div>
       </div>
 
