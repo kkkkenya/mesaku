@@ -13,6 +13,7 @@ import {
   Mail,
 } from "lucide-react";
 import mesaLogo from "@/assets/mesa-logo.png";
+import ThemeToggle from "@/components/ThemeToggle";
 
 type NavItem =
   | { label: string; type: "scroll"; targetId: string; path: string; icon: React.ComponentType<{ className?: string }> }
@@ -222,9 +223,12 @@ const Navbar = () => {
               MESA KU
             </span>
           </Link>
-          <nav className="flex items-center gap-6 px-4 pr-6">
+          <nav className="flex items-center gap-6 px-4">
             {navItems.map((item) => renderDesktopLink(item))}
           </nav>
+          <div className="pr-3 pl-1 flex items-center">
+            <ThemeToggle className="text-[#1E3A8A]" />
+          </div>
         </div>
       </div>
 
@@ -258,12 +262,14 @@ const Navbar = () => {
             </span>
           </Link>
 
-          {/* Pill toggle button */}
-          <button
-            type="button"
-            aria-label={open ? "Close menu" : "Open menu"}
-            aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
+          <div className="flex items-center gap-1">
+            <ThemeToggle className={open ? "text-white" : "text-[#1E3A8A]"} />
+            {/* Pill toggle button */}
+            <button
+              type="button"
+              aria-label={open ? "Close menu" : "Open menu"}
+              aria-expanded={open}
+              onClick={() => setOpen((v) => !v)}
             className={`relative h-10 px-3.5 inline-flex items-center gap-2 rounded-xl transition-all duration-300 ${
               open
                 ? "bg-[#D4A017] text-[#0f1d33]"
@@ -291,7 +297,8 @@ const Navbar = () => {
                 }}
               />
             </div>
-          </button>
+            </button>
+          </div>
         </div>
       </div>
 
