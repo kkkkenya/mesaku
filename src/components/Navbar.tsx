@@ -13,6 +13,7 @@ import {
   Mail,
 } from "lucide-react";
 import mesaLogo from "@/assets/mesa-logo.png";
+import ThemeToggle from "@/components/ThemeToggle";
 
 type NavItem =
   | { label: string; type: "scroll"; targetId: string; path: string; icon: React.ComponentType<{ className?: string }> }
