@@ -262,12 +262,14 @@ const Navbar = () => {
             </span>
           </Link>
 
-          {/* Pill toggle button */}
-          <button
-            type="button"
-            aria-label={open ? "Close menu" : "Open menu"}
-            aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
+          <div className="flex items-center gap-1">
+            <ThemeToggle className={open ? "text-white" : "text-[#1E3A8A]"} />
+            {/* Pill toggle button */}
+            <button
+              type="button"
+              aria-label={open ? "Close menu" : "Open menu"}
+              aria-expanded={open}
+              onClick={() => setOpen((v) => !v)}
             className={`relative h-10 px-3.5 inline-flex items-center gap-2 rounded-xl transition-all duration-300 ${
               open
                 ? "bg-[#D4A017] text-[#0f1d33]"
