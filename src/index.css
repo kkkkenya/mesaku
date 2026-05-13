@@ -64,74 +64,6 @@
     --teal-foreground: 0 0% 100%;
     --teal-soft: 167 76% 95%;
   }
-
-  :root,
-  [data-theme="light"] {
-    --color-bg: #f7f6f2;
-    --color-surface: #f9f8f5;
-    --color-surface-2: #fbfbf9;
-    --color-border: #d4d1ca;
-    --color-text: #28251d;
-    --color-text-muted: #7a7974;
-    --color-text-faint: #bab9b4;
-    --color-primary: #01696f;
-    --color-primary-hover: #0c4e54;
-    --shadow-md: 0 4px 12px oklch(0.2 0.01 80 / 0.08);
-  }
-
-  [data-theme="dark"] {
-    /* Deep near-black surface system */
-    --color-bg: #0a0a09;
-    --color-surface: #111110;
-    --color-surface-2: #161614;
-    --color-surface-offset: #1a1a18;
-    --color-surface-offset-2: #1f1f1c;
-    --color-surface-dynamic: #252522;
-    --color-divider: #1e1e1b;
-    --color-border: #2e2e2b;
-    --color-text: #e8e7e3;
-    --color-text-muted: #8a8984;
-    --color-text-faint: #4e4e4b;
-    --color-text-inverse: #0a0a09;
-    --color-primary: #5ab4c0;
-    --color-primary-hover: #3a9fad;
-    --color-primary-active: #2a8a99;
-    --color-primary-highlight: #1a3a3e;
-    --shadow-sm: 0 1px 3px oklch(0 0 0 / 0.4);
-    --shadow-md: 0 4px 16px oklch(0 0 0 / 0.5);
-    --shadow-lg: 0 12px 40px oklch(0 0 0 / 0.6);
-
-    /* Map existing semantic HSL tokens to deep dark equivalents */
-    --background: 60 6% 4%;          /* #0a0a09 */
-    --foreground: 48 8% 90%;         /* #e8e7e3 */
-    --card: 60 3% 7%;                /* #111110 */
-    --card-foreground: 48 8% 90%;
-    --popover: 60 3% 7%;
-    --popover-foreground: 48 8% 90%;
-    --primary: 188 38% 56%;          /* #5ab4c0 */
-    --primary-foreground: 60 6% 4%;
-    --secondary: 60 4% 11%;          /* #1f1f1c */
-    --secondary-foreground: 48 8% 90%;
-    --muted: 60 4% 9%;               /* #1a1a18 */
-    --muted-foreground: 45 3% 53%;   /* #8a8984 */
-    --accent: 60 4% 11%;
-    --accent-foreground: 48 8% 90%;
-    --navy: 60 6% 4%;
-    --navy-foreground: 48 8% 90%;
-    --surface: 60 3% 7%;             /* #111110 */
-    --surface-foreground: 48 8% 90%;
-    --destructive: 0 70% 55%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 60 3% 18%;             /* #2e2e2b */
-    --input: 60 4% 9%;
-    --ring: 188 38% 56%;
-  }
-
-  /* Stronger image treatment in dark mode for premium integrated feel */
-  [data-theme="dark"] img:not([class*="logo"]):not([class*="partner"]):not([data-no-dim]) {
-    opacity: 0.85;
-    filter: brightness(0.92) contrast(1.05);
-  }
 }
 
 @layer base {
@@ -141,22 +73,8 @@
   body {
     @apply bg-background text-foreground font-body;
   }
-  /* Smooth color transitions only after hydration (avoids initial flash) */
-  body.theme-ready,
-  body.theme-ready * {
-    transition: background-color 300ms ease, border-color 300ms ease, color 300ms ease;
-  }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
-  }
-
-  /* Logo swap helpers */
-  [data-theme="dark"] .logo-light { display: none; }
-  [data-theme="light"] .logo-dark { display: none; }
-
-  /* Soften decorative imagery in dark mode */
-  [data-theme="dark"] img:not(.logo):not([data-no-dim]) {
-    opacity: 0.88;
   }
 }
 
