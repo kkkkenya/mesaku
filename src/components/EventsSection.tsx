@@ -41,12 +41,7 @@ const EventsSection = () => {
       });
   }, []);
 
-  const addToCalendar = (event: EventData) => {
-    if (!event.event_date) return;
-    const startDate = event.event_date.replace(/[-:]/g, "").slice(0, 15) + "Z";
-    const calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${startDate}/${startDate}&details=${encodeURIComponent(event.description || "")}&location=${encodeURIComponent(event.venue || "")}`;
-    window.open(calUrl, "_blank");
-  };
+  // Calendar handled by CalendarOptionsSheet via setCalEvent
 
   return (
     <section id="events" className="py-12 md:py-20 bg-gray-50" ref={ref}>
