@@ -24,6 +24,7 @@ const formatTime = (d: string) =>
 const Events = () => {
   const [events, setEvents] = useState<EventData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [calEvent, setCalEvent] = useState<EventData | null>(null);
 
   useEffect(() => {
     document.title = "Upcoming Events | MESA KU - Mechanical Engineering Students Association";
@@ -40,13 +41,6 @@ const Events = () => {
         setLoading(false);
       });
   }, []);
-
-  const addToCalendar = (event: EventData) => {
-    if (!event.event_date) return;
-    const startDate = event.event_date.replace(/[-:]/g, "").slice(0, 15) + "Z";
-    const calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${startDate}/${startDate}&details=${encodeURIComponent(event.description || "")}&location=${encodeURIComponent(event.venue || "")}`;
-    window.open(calUrl, "_blank");
-  };
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
