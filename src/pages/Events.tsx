@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, MapPin, Clock, CalendarCheck, CalendarPlus, Loader2 } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, CalendarCheck, CalendarPlus, Loader2, ExternalLink, ChevronRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import CalendarOptionsSheet from "@/components/CalendarOptionsSheet";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
