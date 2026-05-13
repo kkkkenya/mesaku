@@ -133,12 +133,13 @@ const Events = () => {
                             className="flex items-center justify-center gap-2 bg-[#1E3A8A] text-white h-11 rounded-lg text-sm font-semibold hover:bg-[#15498f] transition-colors w-full"
                           >
                             <CalendarCheck size={16} /> RSVP Now
+                            <ExternalLink size={13} className="opacity-80" aria-label="Opens in new tab" />
                           </a>
                         )}
                         {event.event_date && (
                           <button
-                            onClick={() => addToCalendar(event)}
-                            className="flex items-center justify-center gap-2 text-[#1E3A8A] h-9 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors w-full"
+                            onClick={() => setCalEvent(event)}
+                            className="flex items-center justify-center gap-2 text-[#1E3A8A] h-11 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors w-full"
                           >
                             <CalendarPlus size={15} /> Add to Calendar
                           </button>
@@ -153,6 +154,7 @@ const Events = () => {
         </div>
       </main>
       <Footer />
+      <CalendarOptionsSheet event={calEvent} onClose={() => setCalEvent(null)} />
     </div>
   );
 };
