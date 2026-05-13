@@ -47,9 +47,20 @@ const Events = () => {
       <Navbar />
       <main className="flex-1">
         <div className="max-w-4xl mx-auto px-4 md:px-8 pt-24 pb-16">
+          {/* Breadcrumb */}
+          <nav aria-label="Breadcrumb" className="mb-3">
+            <ol className="flex items-center gap-1.5 text-xs text-gray-500">
+              <li>
+                <Link to="/" className="hover:text-[#1E3A8A] hover:underline">Home</Link>
+              </li>
+              <li><ChevronRight size={12} className="text-gray-400" /></li>
+              <li className="font-semibold text-[#1E3A8A]" aria-current="page">Events</li>
+            </ol>
+          </nav>
+
           <Link
             to="/"
-            className="inline-flex items-center gap-1 text-[#1E3A8A] text-sm hover:underline mb-6"
+            className="inline-flex items-center gap-1 text-[#1E3A8A] text-sm hover:underline mb-6 min-h-[44px]"
           >
             <ArrowLeft size={16} /> Back to Home
           </Link>
