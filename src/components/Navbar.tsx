@@ -7,18 +7,19 @@ import {
   Image as ImageIcon,
   Megaphone,
   ShoppingBag,
-  ArrowUpRight,
-  Instagram,
-  Linkedin,
   Mail,
+  Menu as MenuIcon,
+  X as CloseIcon,
 } from "lucide-react";
 import mesaLogo from "@/assets/mesa-logo.png";
 
 type NavItem =
   | { label: string; type: "scroll"; targetId: string; path: string; icon: React.ComponentType<{ className?: string }> }
-  | { label: string; type: "route"; to: string; icon: React.ComponentType<{ className?: string }> };
+  | { label: string; type: "route"; to: string; icon: React.ComponentType<{ className?: string }> }
+  | { label: string; type: "external"; href: string; icon: React.ComponentType<{ className?: string }> };
 
-const navItems: NavItem[] = [
+// Desktop keeps Announcements; Mobile uses a tighter primary list.
+const desktopNavItems: NavItem[] = [
   { label: "Home", type: "route", to: "/", icon: Home },
   { label: "About", type: "scroll", targetId: "about", path: "/", icon: Info },
   { label: "Events", type: "route", to: "/events", icon: CalendarDays },
@@ -27,10 +28,21 @@ const navItems: NavItem[] = [
   { label: "Merch", type: "scroll", targetId: "merchandise", path: "/", icon: ShoppingBag },
 ];
 
+const mobileNavItems: NavItem[] = [
+  { label: "Home", type: "route", to: "/", icon: Home },
+  { label: "About", type: "scroll", targetId: "about", path: "/", icon: Info },
+  { label: "Events", type: "route", to: "/events", icon: CalendarDays },
+  { label: "Gallery", type: "route", to: "/gallery", icon: ImageIcon },
+  { label: "Merch", type: "scroll", targetId: "merchandise", path: "/", icon: ShoppingBag },
+  { label: "Contact", type: "external", href: "mailto:mechstudentsassociation.ku@gmail.com", icon: Mail },
+];
+
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -58,17 +70,48 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
-  // Lock body scroll + Escape close on mobile drawer
+  // Mobile drawer: scroll lock, escape, focus trap, restore focus on close
   useEffect(() => {
     if (!open) return;
     if (window.innerWidth >= 768) return;
-    const prev = document.body.style.overflow;
+
+    const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        return;
+      }
+      if (e.key === "Tab" && drawerRef.current) {
+        const focusables = drawerRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        if (!focusables.length) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
     window.addEventListener("keydown", onKey);
+
+    // Move focus to first interactive element in drawer
+    const t = setTimeout(() => {
+      drawerRef.current?.querySelector<HTMLElement>("a,button")?.focus();
+    }, 80);
+
     return () => {
-      document.body.style.overflow = prev;
+      document.body.style.overflow = prevOverflow;
       window.removeEventListener("keydown", onKey);
+      clearTimeout(t);
+      // Return focus to the trigger
+      triggerRef.current?.focus();
     };
   }, [open]);
 
@@ -105,6 +148,13 @@ const Navbar = () => {
         </Link>
       );
     }
+    if (item.type === "external") {
+      return (
+        <a key={item.label} href={item.href} className={cls}>
+          {item.label}
+        </a>
+      );
+    }
     return (
       <button
         key={item.label}
@@ -117,54 +167,38 @@ const Navbar = () => {
     );
   };
 
-  // ===== MOBILE MENU ROW =====
+  // ===== MOBILE LINK ROW (minimal) =====
   const renderMobileLink = (item: NavItem, index: number) => {
     const active = isActive(item);
     const Icon = item.icon;
-    const num = String(index + 1).padStart(2, "0");
 
     const inner = (
       <>
-        {/* Index number */}
+        <Icon
+          className={`h-5 w-5 shrink-0 transition-colors ${
+            active ? "text-[#D4A017]" : "text-[#1E3A8A]/70 group-hover:text-[#1E3A8A]"
+          }`}
+        />
         <span
-          className={`font-mono text-[11px] tracking-widest pt-1 transition-colors ${
-            active ? "text-[#D4A017]" : "text-white/30 group-hover:text-[#D4A017]/70"
+          className={`flex-1 font-medium text-[17px] transition-colors ${
+            active ? "text-[#D4A017]" : "text-[#0f1d33] group-hover:text-[#1E3A8A]"
           }`}
         >
-          {num}
+          {item.label}
         </span>
-
-        {/* Label */}
-        <span className="flex-1 flex items-center gap-3">
-          <span
-            className={`font-heading text-[1.75rem] leading-none font-bold tracking-tight transition-colors ${
-              active ? "text-[#D4A017]" : "text-white group-hover:text-[#D4A017]"
-            }`}
-          >
-            {item.label}
-          </span>
-        </span>
-
-        {/* Icon */}
-        <span
-          className={`h-9 w-9 rounded-full flex items-center justify-center border transition-all ${
-            active
-              ? "border-[#D4A017]/50 bg-[#D4A017]/10 text-[#D4A017]"
-              : "border-white/10 bg-white/[0.03] text-white/60 group-hover:border-[#D4A017]/40 group-hover:text-[#D4A017]"
-          }`}
-        >
-          <Icon className="h-4 w-4" />
-        </span>
+        {active && (
+          <span className="h-1.5 w-1.5 rounded-full bg-[#D4A017]" aria-hidden />
+        )}
       </>
     );
 
     const rowCls =
-      "group relative w-full flex items-start gap-4 px-5 py-4 rounded-2xl border border-transparent hover:border-white/10 hover:bg-white/[0.03] active:scale-[0.99] transition-all duration-200";
+      "group flex items-center gap-4 w-full min-h-[52px] px-4 rounded-xl hover:bg-[#1E3A8A]/[0.04] active:bg-[#1E3A8A]/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E3A8A]/40 transition-colors";
 
     const style: React.CSSProperties = {
       opacity: open ? 1 : 0,
-      transform: open ? "translateY(0)" : "translateY(14px)",
-      transition: `opacity 0.4s ease ${120 + index * 55}ms, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) ${120 + index * 55}ms`,
+      transform: open ? "translateX(0)" : "translateX(8px)",
+      transition: `opacity 0.25s ease ${60 + index * 35}ms, transform 0.3s ease ${60 + index * 35}ms`,
     };
 
     if (item.type === "route") {
@@ -182,6 +216,19 @@ const Navbar = () => {
         >
           {inner}
         </Link>
+      );
+    }
+    if (item.type === "external") {
+      return (
+        <a
+          key={item.label}
+          href={item.href}
+          className={rowCls}
+          style={style}
+          onClick={() => setOpen(false)}
+        >
+          {inner}
+        </a>
       );
     }
     return (
@@ -223,201 +270,103 @@ const Navbar = () => {
             </span>
           </Link>
           <nav className="flex items-center gap-6 px-4 pr-6">
-            {navItems.map((item) => renderDesktopLink(item))}
+            {desktopNavItems.map((item) => renderDesktopLink(item))}
           </nav>
         </div>
       </div>
 
-      {/* ===== MOBILE FLOATING TOP BAR ===== */}
-      <div className="md:hidden fixed top-3 left-3 right-3 z-[60]">
+      {/* ===== MOBILE COMPACT TOP BAR ===== */}
+      <div className="md:hidden fixed top-0 inset-x-0 z-[60]">
         <div
-          className={`flex items-center justify-between h-14 pl-3 pr-2 rounded-2xl border transition-all duration-300 ${
-            open
-              ? "bg-[#0f1d33]/90 border-white/10 backdrop-blur-xl"
-              : scrolled
-              ? "bg-white/85 border-[#1E3A8A]/10 backdrop-blur-xl shadow-[0_8px_30px_-10px_rgba(15,29,51,0.25)]"
-              : "bg-white/95 border-[#1E3A8A]/10 shadow-[0_4px_20px_-8px_rgba(15,29,51,0.18)]"
+          className={`flex items-center justify-between h-14 px-4 transition-colors duration-200 ${
+            scrolled || open
+              ? "bg-white/95 backdrop-blur-md border-b border-gray-100"
+              : "bg-white/80 backdrop-blur-sm"
           }`}
         >
           <Link
             to="/"
-            className="flex items-center gap-2 min-w-0"
+            className="flex items-center gap-2 min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E3A8A]/40 rounded-md"
             onClick={() => setOpen(false)}
+            aria-label="MESA KU — Home"
           >
-            <img
-              src={mesaLogo}
-              alt="MESA KU - Mechanical Engineering Students Association Kenyatta University logo"
-              className="h-8 w-auto shrink-0"
-            />
-            <span
-              className={`text-[15px] font-bold font-heading tracking-tight truncate transition-colors ${
-                open ? "text-white" : "text-[#1E3A8A]"
-              }`}
-            >
+            <img src={mesaLogo} alt="" className="h-7 w-auto shrink-0" />
+            <span className="text-[15px] font-bold font-heading tracking-tight text-[#1E3A8A]">
               MESA <span className="text-[#D4A017]">KU</span>
             </span>
           </Link>
 
-          {/* Pill toggle button */}
           <button
+            ref={triggerRef}
             type="button"
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
+            aria-controls="mobile-menu"
             onClick={() => setOpen((v) => !v)}
-            className={`relative h-10 px-3.5 inline-flex items-center gap-2 rounded-xl transition-all duration-300 ${
-              open
-                ? "bg-[#D4A017] text-[#0f1d33]"
-                : "bg-[#1E3A8A] text-white hover:bg-[#1E3A8A]/90"
-            }`}
+            className="h-11 w-11 -mr-2 inline-flex items-center justify-center rounded-full text-[#1E3A8A] hover:bg-[#1E3A8A]/[0.06] active:bg-[#1E3A8A]/[0.1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E3A8A]/40 transition-colors"
           >
-            <span className="text-[11px] font-bold tracking-[0.15em] uppercase">
-              {open ? "Close" : "Menu"}
-            </span>
-            <div className="relative w-4 h-3">
-              <span
-                className="absolute left-0 top-0 block h-[2px] w-4 rounded transition-all duration-300 origin-center bg-current"
-                style={{
-                  transform: open ? "translateY(5px) rotate(45deg)" : "translateY(0)",
-                }}
-              />
-              <span
-                className="absolute left-0 top-1/2 -translate-y-1/2 block h-[2px] w-4 rounded transition-all duration-300 bg-current"
-                style={{ opacity: open ? 0 : 1, transform: open ? "scaleX(0)" : "scaleX(1)" }}
-              />
-              <span
-                className="absolute left-0 bottom-0 block h-[2px] w-4 rounded transition-all duration-300 origin-center bg-current"
-                style={{
-                  transform: open ? "translateY(-5px) rotate(-45deg)" : "translateY(0)",
-                }}
-              />
-            </div>
+            {open ? <CloseIcon className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
           </button>
         </div>
       </div>
 
-      {/* ===== MOBILE FULL-SCREEN MENU ===== */}
+      {/* ===== MOBILE BACKDROP ===== */}
       <div
-        className="md:hidden fixed inset-0 z-50 overflow-hidden"
+        className="md:hidden fixed inset-0 z-[55] bg-black/30 backdrop-blur-[2px]"
         style={{
           opacity: open ? 1 : 0,
           pointerEvents: open ? "auto" : "none",
-          transition: "opacity 0.3s ease",
+          transition: "opacity 0.2s ease",
+        }}
+        aria-hidden="true"
+        onClick={() => setOpen(false)}
+      />
+
+      {/* ===== MOBILE SLIDE-OVER DRAWER ===== */}
+      <div
+        id="mobile-menu"
+        ref={drawerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Main menu"
+        className="md:hidden fixed top-0 right-0 bottom-0 z-[58] w-[86%] max-w-[340px] bg-white shadow-xl flex flex-col"
+        style={{
+          transform: open ? "translateX(0)" : "translateX(100%)",
+          transition: "transform 0.28s cubic-bezier(0.32, 0.72, 0, 1)",
+          visibility: open ? "visible" : "hidden",
         }}
         aria-hidden={!open}
       >
-        {/* Layered background */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(circle at 20% 0%, #1E3A8A 0%, #0f1d33 45%, #08111f 100%)",
-            transform: open ? "scale(1)" : "scale(1.05)",
-            transition: "transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)",
-          }}
-        />
-
-        {/* Decorative grid lines */}
-        <div
-          className="absolute inset-0 pointer-events-none opacity-[0.07]"
-          style={{
-            backgroundImage:
-              "linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)",
-            backgroundSize: "48px 48px",
-          }}
-        />
-
-        {/* Glow accent */}
-        <div
-          className="absolute -top-32 -right-32 w-[420px] h-[420px] rounded-full pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(212,160,23,0.18) 0%, transparent 70%)",
-          }}
-        />
-
-        {/* Watermark */}
-        <div
-          className="absolute inset-0 flex items-center justify-center pointer-events-none"
-          style={{ opacity: 0.04 }}
-        >
-          <img src={mesaLogo} alt="" className="w-[75%] max-w-md" />
+        {/* Drawer header */}
+        <div className="flex items-center justify-between h-14 px-4 border-b border-gray-100">
+          <span className="text-[11px] uppercase tracking-[0.18em] font-semibold text-gray-400">
+            Menu
+          </span>
+          <button
+            type="button"
+            aria-label="Close menu"
+            onClick={() => setOpen(false)}
+            className="h-11 w-11 -mr-2 inline-flex items-center justify-center rounded-full text-[#1E3A8A] hover:bg-[#1E3A8A]/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1E3A8A]/40"
+          >
+            <CloseIcon className="h-5 w-5" />
+          </button>
         </div>
 
-        {/* Content */}
-        <div className="relative h-full flex flex-col pt-20 pb-6 px-4">
-          {/* Eyebrow */}
-          <div
-            className="px-5 mb-4 flex items-center gap-3"
-            style={{
-              opacity: open ? 1 : 0,
-              transform: open ? "translateY(0)" : "translateY(8px)",
-              transition: "opacity 0.4s ease 80ms, transform 0.4s ease 80ms",
-            }}
-          >
-            <span className="h-px flex-1 bg-gradient-to-r from-[#D4A017]/60 to-transparent" />
-            <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-[#D4A017]/80">
-              Navigate
-            </span>
-            <span className="h-px w-6 bg-gradient-to-l from-[#D4A017]/60 to-transparent" />
-          </div>
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
+          {mobileNavItems.map((item, i) => renderMobileLink(item, i))}
+        </nav>
 
-          {/* Nav items */}
-          <nav className="flex-1 flex flex-col justify-center gap-0.5 overflow-y-auto">
-            {navItems.map((item, i) => renderMobileLink(item, i))}
-          </nav>
-
-          {/* Footer / secondary actions */}
-          <div
-            className="mt-6 pt-5 border-t border-white/10"
-            style={{
-              opacity: open ? 1 : 0,
-              transform: open ? "translateY(0)" : "translateY(12px)",
-              transition: `opacity 0.4s ease ${120 + navItems.length * 55 + 80}ms, transform 0.4s ease ${120 + navItems.length * 55 + 80}ms`,
-            }}
-          >
-            <a
-              href="mailto:mesa@ku.ac.ke"
-              className="group flex items-center justify-between px-5 py-3.5 rounded-2xl bg-[#D4A017] text-[#0f1d33] font-bold text-sm tracking-wide active:scale-[0.98] transition-transform"
-              onClick={() => setOpen(false)}
-            >
-              <span className="inline-flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                Get in touch
-              </span>
-              <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-            </a>
-
-            <div className="mt-4 flex items-center justify-between px-2">
-              <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-white/40">
-                MESA · KU · 2026
-              </p>
-              <div className="flex items-center gap-2">
-                <a
-                  href="https://instagram.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Instagram"
-                  className="h-9 w-9 rounded-full border border-white/10 bg-white/[0.03] flex items-center justify-center text-white/70 hover:text-[#D4A017] hover:border-[#D4A017]/40 transition-colors"
-                >
-                  <Instagram className="h-4 w-4" />
-                </a>
-                <a
-                  href="https://linkedin.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="LinkedIn"
-                  className="h-9 w-9 rounded-full border border-white/10 bg-white/[0.03] flex items-center justify-center text-white/70 hover:text-[#D4A017] hover:border-[#D4A017]/40 transition-colors"
-                >
-                  <Linkedin className="h-4 w-4" />
-                </a>
-              </div>
-            </div>
-          </div>
+        {/* Footer / brand line */}
+        <div className="px-5 py-4 border-t border-gray-100">
+          <p className="text-[11px] text-gray-400 tracking-wide">
+            MESA · Kenyatta University
+          </p>
         </div>
       </div>
 
       {/* Spacer so mobile content isn't hidden under fixed top bar */}
-      <div className="md:hidden h-20" aria-hidden />
+      <div className="md:hidden h-14" aria-hidden />
     </>
   );
 };
