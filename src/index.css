@@ -123,8 +123,15 @@
     --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
     --border: 60 3% 18%;             /* #2e2e2b */
-    --input: 30 2% 22%;
-    --ring: 187 35% 47%;
+    --input: 60 4% 9%;
+    --ring: 188 38% 56%;
+  }
+
+  /* Stronger image treatment in dark mode for premium integrated feel */
+  [data-theme="dark"] img:not([class*="logo"]):not([class*="partner"]):not([data-no-dim]) {
+    opacity: 0.85;
+    filter: brightness(0.92) contrast(1.05);
+  }
   }
 }
 
