@@ -24,7 +24,7 @@ const formatTime = (d: string) => {
 
 const EventsSection = () => {
   const { ref, inView } = useInView();
-  const [rsvpEvent, setRsvpEvent] = useState<EventData | null>(null);
+  const [calEvent, setCalEvent] = useState<EventData | null>(null);
   const [events, setEvents] = useState<EventData[]>([]);
   const [loading, setLoading] = useState(true);
 
