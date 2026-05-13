@@ -1,9 +1,10 @@
-import { MapPin, Clock, CalendarCheck, CalendarPlus, X, Loader2 } from "lucide-react";
+import { MapPin, Clock, CalendarCheck, CalendarPlus, Loader2, ExternalLink } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useInView } from "@/hooks/useInView";
 import type { Tables } from "@/integrations/supabase/types";
+import CalendarOptionsSheet from "./CalendarOptionsSheet";
 
 type EventData = Tables<"events">;
 
@@ -23,7 +24,7 @@ const formatTime = (d: string) => {
 
 const EventsSection = () => {
   const { ref, inView } = useInView();
-  const [rsvpEvent, setRsvpEvent] = useState<EventData | null>(null);
+  const [calEvent, setCalEvent] = useState<EventData | null>(null);
   const [events, setEvents] = useState<EventData[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,12 +41,7 @@ const EventsSection = () => {
       });
   }, []);
 
-  const addToCalendar = (event: EventData) => {
-    if (!event.event_date) return;
-    const startDate = event.event_date.replace(/[-:]/g, "").slice(0, 15) + "Z";
-    const calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${startDate}/${startDate}&details=${encodeURIComponent(event.description || "")}&location=${encodeURIComponent(event.venue || "")}`;
-    window.open(calUrl, "_blank");
-  };
+  // Calendar handled by CalendarOptionsSheet via setCalEvent
 
   return (
     <section id="events" className="py-12 md:py-20 bg-gray-50" ref={ref}>
@@ -108,17 +104,20 @@ const EventsSection = () => {
                     {/* Actions — pushed to bottom */}
                     <div className="mt-auto flex flex-col gap-2">
                       {event.rsvp_url && (
-                        <button
-                          onClick={() => setRsvpEvent(event)}
+                        <a
+                          href={event.rsvp_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="flex items-center justify-center gap-2 bg-[#1E3A8A] text-white h-11 rounded-lg text-sm font-semibold hover:bg-[#15498f] transition-colors w-full"
                         >
                           <CalendarCheck size={16} /> RSVP Now
-                        </button>
+                          <ExternalLink size={13} className="opacity-80" aria-label="Opens in new tab" />
+                        </a>
                       )}
                       {event.event_date && (
                         <button
-                          onClick={() => addToCalendar(event)}
-                          className="flex items-center justify-center gap-2 text-[#1E3A8A] h-9 rounded-lg text-sm font-medium hover:bg-muted/60 transition-colors w-full"
+                          onClick={() => setCalEvent(event)}
+                          className="flex items-center justify-center gap-2 text-[#1E3A8A] h-11 rounded-lg text-sm font-medium hover:bg-muted/60 transition-colors w-full"
                         >
                           <CalendarPlus size={15} /> Add to Calendar
                         </button>
@@ -143,18 +142,7 @@ const EventsSection = () => {
         )}
       </div>
 
-      {/* RSVP Modal */}
-      {rsvpEvent && rsvpEvent.rsvp_url && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setRsvpEvent(null)}>
-          <div className="bg-white w-full h-full md:w-[600px] md:h-auto md:max-h-[90vh] md:rounded-xl overflow-hidden relative" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-4 border-b">
-              <h3 className="font-heading text-lg font-bold">{rsvpEvent.title}</h3>
-              <button onClick={() => setRsvpEvent(null)} className="p-1"><X size={24} /></button>
-            </div>
-            <iframe src={rsvpEvent.rsvp_url} width="100%" height="480" frameBorder={0} title="RSVP Form" className="w-full" />
-          </div>
-        </div>
-      )}
+      <CalendarOptionsSheet event={calEvent} onClose={() => setCalEvent(null)} />
     </section>
   );
 };

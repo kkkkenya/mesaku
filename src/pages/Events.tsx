@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, MapPin, Clock, CalendarCheck, CalendarPlus, Loader2 } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, CalendarCheck, CalendarPlus, Loader2, ExternalLink, ChevronRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import CalendarOptionsSheet from "@/components/CalendarOptionsSheet";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -23,6 +24,7 @@ const formatTime = (d: string) =>
 const Events = () => {
   const [events, setEvents] = useState<EventData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [calEvent, setCalEvent] = useState<EventData | null>(null);
 
   useEffect(() => {
     document.title = "Upcoming Events | MESA KU - Mechanical Engineering Students Association";
@@ -40,21 +42,25 @@ const Events = () => {
       });
   }, []);
 
-  const addToCalendar = (event: EventData) => {
-    if (!event.event_date) return;
-    const startDate = event.event_date.replace(/[-:]/g, "").slice(0, 15) + "Z";
-    const calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${startDate}/${startDate}&details=${encodeURIComponent(event.description || "")}&location=${encodeURIComponent(event.venue || "")}`;
-    window.open(calUrl, "_blank");
-  };
-
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Navbar />
       <main className="flex-1">
         <div className="max-w-4xl mx-auto px-4 md:px-8 pt-24 pb-16">
+          {/* Breadcrumb */}
+          <nav aria-label="Breadcrumb" className="mb-3">
+            <ol className="flex items-center gap-1.5 text-xs text-gray-500">
+              <li>
+                <Link to="/" className="hover:text-[#1E3A8A] hover:underline">Home</Link>
+              </li>
+              <li><ChevronRight size={12} className="text-gray-400" /></li>
+              <li className="font-semibold text-[#1E3A8A]" aria-current="page">Events</li>
+            </ol>
+          </nav>
+
           <Link
             to="/"
-            className="inline-flex items-center gap-1 text-[#1E3A8A] text-sm hover:underline mb-6"
+            className="inline-flex items-center gap-1 text-[#1E3A8A] text-sm hover:underline mb-6 min-h-[44px]"
           >
             <ArrowLeft size={16} /> Back to Home
           </Link>
@@ -127,12 +133,13 @@ const Events = () => {
                             className="flex items-center justify-center gap-2 bg-[#1E3A8A] text-white h-11 rounded-lg text-sm font-semibold hover:bg-[#15498f] transition-colors w-full"
                           >
                             <CalendarCheck size={16} /> RSVP Now
+                            <ExternalLink size={13} className="opacity-80" aria-label="Opens in new tab" />
                           </a>
                         )}
                         {event.event_date && (
                           <button
-                            onClick={() => addToCalendar(event)}
-                            className="flex items-center justify-center gap-2 text-[#1E3A8A] h-9 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors w-full"
+                            onClick={() => setCalEvent(event)}
+                            className="flex items-center justify-center gap-2 text-[#1E3A8A] h-11 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors w-full"
                           >
                             <CalendarPlus size={15} /> Add to Calendar
                           </button>
@@ -147,6 +154,7 @@ const Events = () => {
         </div>
       </main>
       <Footer />
+      <CalendarOptionsSheet event={calEvent} onClose={() => setCalEvent(null)} />
     </div>
   );
 };
