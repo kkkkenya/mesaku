@@ -1,9 +1,10 @@
-import { MapPin, Clock, CalendarCheck, CalendarPlus, X, Loader2 } from "lucide-react";
+import { MapPin, Clock, CalendarCheck, CalendarPlus, Loader2, ExternalLink } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useInView } from "@/hooks/useInView";
 import type { Tables } from "@/integrations/supabase/types";
+import CalendarOptionsSheet from "./CalendarOptionsSheet";
 
 type EventData = Tables<"events">;
 
