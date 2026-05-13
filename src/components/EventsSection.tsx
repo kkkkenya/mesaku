@@ -142,18 +142,7 @@ const EventsSection = () => {
         )}
       </div>
 
-      {/* RSVP Modal */}
-      {rsvpEvent && rsvpEvent.rsvp_url && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setRsvpEvent(null)}>
-          <div className="bg-white w-full h-full md:w-[600px] md:h-auto md:max-h-[90vh] md:rounded-xl overflow-hidden relative" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-4 border-b">
-              <h3 className="font-heading text-lg font-bold">{rsvpEvent.title}</h3>
-              <button onClick={() => setRsvpEvent(null)} className="p-1"><X size={24} /></button>
-            </div>
-            <iframe src={rsvpEvent.rsvp_url} width="100%" height="480" frameBorder={0} title="RSVP Form" className="w-full" />
-          </div>
-        </div>
-      )}
+      <CalendarOptionsSheet event={calEvent} onClose={() => setCalEvent(null)} />
     </section>
   );
 };
