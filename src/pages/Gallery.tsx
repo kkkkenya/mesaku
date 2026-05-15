@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { ArrowLeft, ExternalLink, X, ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -115,6 +116,23 @@ const Gallery = () => {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
+      <Helmet>
+        <title>Gallery | MESA KU</title>
+        <meta name="description" content="Photo gallery from MESA KU events, workshops and activities at Kenyatta University." />
+        <link rel="canonical" href="https://mesaku.lovable.app/gallery" />
+        <meta property="og:title" content="Gallery | MESA KU" />
+        <meta property="og:description" content="Photo gallery from MESA KU events, workshops and activities at Kenyatta University." />
+        <meta property="og:url" content="https://mesaku.lovable.app/gallery" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ImageGallery",
+          name: "MESA KU Gallery",
+          url: "https://mesaku.lovable.app/gallery",
+          description: "Photos from MESA KU events and activities at Kenyatta University.",
+          numberOfItems: galleryImages.length,
+          isPartOf: { "@type": "WebSite", name: "MESA KU", url: "https://mesaku.lovable.app" },
+        })}</script>
+      </Helmet>
       <Navbar />
       <main className="flex-1">
         <div className="max-w-6xl mx-auto px-4 md:px-8 pt-24 pb-16">
