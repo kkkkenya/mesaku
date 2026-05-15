@@ -1,0 +1,14 @@
+# MESA KU
+
+> Mechanical Engineering Students Association at Kenyatta University — engineering projects, workshops, industrial visits, competitions, and student leadership.
+
+## Pages
+
+- [Home](/): About MESA KU, executive board, sponsors, and how to get involved.
+- [Events](/events): Upcoming workshops, talks, competitions, and industrial visits.
+- [Announcements](/announcements): News and updates from MESA KU.
+- [Gallery](/gallery): Photos from past events and activities.
+
+## Optional
+
+- [Contact](mailto:mechstudentsassociation.ku@gmail.com): Reach the MESA KU team.

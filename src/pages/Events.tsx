@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { ArrowLeft, MapPin, Clock, CalendarCheck, CalendarPlus, Loader2, ExternalLink, ChevronRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -42,8 +43,47 @@ const Events = () => {
       });
   }, []);
 
+  const eventsJsonLd = useMemo(
+    () =>
+      events
+        .filter((e) => e.event_date)
+        .map((e) => ({
+          "@context": "https://schema.org",
+          "@type": "Event",
+          name: e.title,
+          startDate: e.event_date,
+          eventStatus: "https://schema.org/EventScheduled",
+          eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+          location: {
+            "@type": "Place",
+            name: e.venue || "Kenyatta University",
+            address: "Kenyatta University, Nairobi, Kenya",
+          },
+          image: e.poster_url ? [e.poster_url] : undefined,
+          description: e.description || undefined,
+          organizer: {
+            "@type": "Organization",
+            name: "MESA KU",
+            url: "https://mesaku.lovable.app",
+          },
+          url: e.rsvp_url || "https://mesaku.lovable.app/events",
+        })),
+    [events]
+  );
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
+      <Helmet>
+        <title>Events | MESA KU</title>
+        <meta name="description" content="Upcoming MESA KU events at Kenyatta University — workshops, talks, industrial visits and engineering competitions." />
+        <link rel="canonical" href="https://mesaku.lovable.app/events" />
+        <meta property="og:title" content="Events | MESA KU" />
+        <meta property="og:description" content="Upcoming MESA KU events at Kenyatta University — workshops, talks, industrial visits and engineering competitions." />
+        <meta property="og:url" content="https://mesaku.lovable.app/events" />
+        {eventsJsonLd.length > 0 && (
+          <script type="application/ld+json">{JSON.stringify(eventsJsonLd)}</script>
+        )}
+      </Helmet>
       <Navbar />
       <main className="flex-1">
         <div className="max-w-4xl mx-auto px-4 md:px-8 pt-24 pb-16">

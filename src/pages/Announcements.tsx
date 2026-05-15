@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -49,6 +50,22 @@ const Announcements = () => {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
+      <Helmet>
+        <title>News & Announcements | MESA KU</title>
+        <meta name="description" content="Latest news, updates and announcements from MESA KU at Kenyatta University." />
+        <link rel="canonical" href="https://mesaku.lovable.app/announcements" />
+        <meta property="og:title" content="News & Announcements | MESA KU" />
+        <meta property="og:description" content="Latest news, updates and announcements from MESA KU at Kenyatta University." />
+        <meta property="og:url" content="https://mesaku.lovable.app/announcements" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "News & Announcements",
+          url: "https://mesaku.lovable.app/announcements",
+          description: "Latest news, updates and announcements from MESA KU at Kenyatta University.",
+          isPartOf: { "@type": "WebSite", name: "MESA KU", url: "https://mesaku.lovable.app" },
+        })}</script>
+      </Helmet>
       <Navbar />
       <main className="flex-1">
         <div className="max-w-2xl mx-auto px-4 md:px-8 pt-24 pb-16">
