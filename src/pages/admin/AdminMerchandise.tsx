@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadFile } from "@/lib/storage";
-import { Loader2, Plus, Pencil, Trash2, Eye, EyeOff, X, ShoppingBag } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Eye, EyeOff, X, ShoppingBag, Archive, ArchiveRestore } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import EmptyState from "@/components/admin/EmptyState";
+import ArchiveTabs from "@/components/admin/ArchiveTabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 type Merch = Tables<"merchandise">;
@@ -20,6 +21,7 @@ export default function AdminMerchandise() {
   const [editing, setEditing] = useState<Partial<Merch> | null>(null);
   const [saving, setSaving] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [view, setView] = useState<"active" | "archived">("active");
 
   const fetchItems = async () => {
     setLoading(true);
@@ -66,6 +68,7 @@ export default function AdminMerchandise() {
       status: editing.status || "draft",
       stock_status: editing.stock_status || "in_stock",
       featured: editing.featured ?? false,
+      archived: editing.archived ?? false,
     };
 
     const result = editing.id
@@ -91,11 +94,26 @@ export default function AdminMerchandise() {
     fetchItems();
   };
 
+  const toggleArchive = async (item: Merch) => {
+    const next = !item.archived;
+    const { error } = await supabase.from("merchandise").update({ archived: next }).eq("id", item.id);
+    if (error) {
+      toast.error("Failed to update: " + error.message);
+      return;
+    }
+    toast.success(next ? "Item archived" : "Item restored");
+    fetchItems();
+  };
+
   const remove = async (id: string) => {
     if (!confirm("Delete this item?")) return;
     await supabase.from("merchandise").delete().eq("id", id);
     fetchItems();
   };
+
+  const archivedItems = items.filter((i) => i.archived);
+  const activeItems = items.filter((i) => !i.archived);
+  const visible = view === "archived" ? archivedItems : activeItems;
 
   return (
     <div className="max-w-5xl">
@@ -225,6 +243,21 @@ export default function AdminMerchandise() {
               Mark as featured
             </label>
 
+            <label className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={editing.archived ?? false}
+                onChange={(e) => setEditing({ ...editing, archived: e.target.checked })}
+                className="h-4 w-4 accent-teal"
+              />
+              <span className="text-sm font-semibold text-slate-700">
+                Archived
+                <span className="block text-xs font-normal text-slate-500">
+                  Hidden from the shop, shown in the public archive.
+                </span>
+              </span>
+            </label>
+
             <div className="flex flex-col-reverse sm:flex-row gap-3 pt-3 border-t border-slate-100">
               <button
                 onClick={() => setEditing(null)}
@@ -244,37 +277,56 @@ export default function AdminMerchandise() {
         </div>
       )}
 
+      {!loading && items.length > 0 && (
+        <ArchiveTabs
+          view={view}
+          onChange={setView}
+          activeCount={activeItems.length}
+          archivedCount={archivedItems.length}
+        />
+      )}
+
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-6 w-6 animate-spin text-teal" />
         </div>
-      ) : items.length === 0 ? (
+      ) : visible.length === 0 ? (
         <EmptyState
-          icon={<ShoppingBag className="h-7 w-7" />}
-          title="No merchandise yet"
-          description="Add your first product to start showcasing MESA-branded items."
+          icon={view === "archived" ? <Archive className="h-7 w-7" /> : <ShoppingBag className="h-7 w-7" />}
+          title={view === "archived" ? "Archive is empty" : "No merchandise yet"}
+          description={
+            view === "archived"
+              ? "Archived products will appear here and stay visible in the public archive."
+              : "Add your first product to start showcasing MESA-branded items."
+          }
           action={
-            <button
-              onClick={openNew}
-              className="inline-flex items-center gap-2 h-10 px-5 rounded-lg bg-teal text-teal-foreground font-semibold hover:opacity-90"
-            >
-              <Plus className="h-4 w-4" /> New Item
-            </button>
+            view === "archived" ? undefined : (
+              <button
+                onClick={openNew}
+                className="inline-flex items-center gap-2 h-10 px-5 rounded-lg bg-teal text-teal-foreground font-semibold hover:opacity-90"
+              >
+                <Plus className="h-4 w-4" /> New Item
+              </button>
+            )
           }
         />
       ) : (
         <div className="space-y-3">
-          {items.map((item) => (
+          {visible.map((item) => (
             <div
               key={item.id}
-              className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow"
+              className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow ${
+                item.archived ? "opacity-70" : ""
+              }`}
             >
               <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                 {item.image_url && (
                   <img
                     src={item.image_url}
                     alt=""
-                    className="h-14 w-14 sm:h-16 sm:w-16 object-cover rounded-lg shrink-0"
+                    className={`h-14 w-14 sm:h-16 sm:w-16 object-cover rounded-lg shrink-0 ${
+                      item.archived ? "grayscale" : ""
+                    }`}
                   />
                 )}
                 <div className="flex-1 min-w-0">
@@ -287,14 +339,32 @@ export default function AdminMerchandise() {
               <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100">
                 <span
                   className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                    item.status === "published"
-                      ? "bg-teal text-teal-foreground"
-                      : "bg-slate-200 text-slate-700"
+                    item.archived
+                      ? "bg-slate-200 text-slate-600"
+                      : item.status === "published"
+                        ? "bg-teal text-teal-foreground"
+                        : "bg-slate-200 text-slate-700"
                   }`}
                 >
-                  {item.status}
+                  {item.archived ? "archived" : item.status}
                 </span>
                 <div className="flex gap-1">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => toggleArchive(item)}
+                        aria-label={item.archived ? "Restore from archive" : "Archive"}
+                        className="h-10 w-10 inline-flex items-center justify-center rounded-md hover:bg-slate-100 text-slate-600"
+                      >
+                        {item.archived ? (
+                          <ArchiveRestore className="h-4 w-4" />
+                        ) : (
+                          <Archive className="h-4 w-4" />
+                        )}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>{item.archived ? "Restore" : "Archive"}</TooltipContent>
+                  </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button

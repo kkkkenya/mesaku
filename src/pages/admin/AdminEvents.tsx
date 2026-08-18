@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadFile } from "@/lib/storage";
-import { Loader2, Plus, Pencil, Trash2, Eye, EyeOff, X, CalendarDays } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Eye, EyeOff, X, CalendarDays, Archive, ArchiveRestore } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import EmptyState from "@/components/admin/EmptyState";
+import ArchiveTabs from "@/components/admin/ArchiveTabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { isPastEvent } from "@/lib/archive";
 
 type Event = Tables<"events">;
+
 
 const inputCls =
   "w-full h-11 px-3.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal/40 focus:border-teal transition-colors";
@@ -21,6 +24,8 @@ export default function AdminEvents() {
   const [editing, setEditing] = useState<Partial<Event> | null>(null);
   const [saving, setSaving] = useState(false);
   const [posterFile, setPosterFile] = useState<File | null>(null);
+  const [view, setView] = useState<"active" | "archived">("active");
+
 
   const fetchEvents = async () => {
     setLoading(true);
@@ -59,6 +64,8 @@ export default function AdminEvents() {
       event_date: editing.event_date || null,
       poster_url,
       status: editing.status || "draft",
+      archived: editing.archived ?? false,
+
     };
 
     const result = editing.id
@@ -84,11 +91,27 @@ export default function AdminEvents() {
     fetchEvents();
   };
 
+  const toggleArchive = async (ev: Event) => {
+    const next = !ev.archived;
+    const { error } = await supabase.from("events").update({ archived: next }).eq("id", ev.id);
+    if (error) {
+      toast.error("Failed to update: " + error.message);
+      return;
+    }
+    toast.success(next ? "Event archived" : "Event restored");
+    fetchEvents();
+  };
+
   const remove = async (id: string) => {
     if (!confirm("Delete this event?")) return;
     await supabase.from("events").delete().eq("id", id);
     fetchEvents();
   };
+
+  const archivedEvents = events.filter((e) => e.archived);
+  const activeEvents = events.filter((e) => !e.archived);
+  const visible = view === "archived" ? archivedEvents : activeEvents;
+
 
   return (
     <div className="max-w-5xl">
@@ -212,6 +235,22 @@ export default function AdminEvents() {
               </select>
             </div>
 
+            <label className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={editing.archived ?? false}
+                onChange={(e) => setEditing({ ...editing, archived: e.target.checked })}
+                className="h-4 w-4 accent-teal"
+              />
+              <span className="text-sm font-semibold text-slate-700">
+                Archived
+                <span className="block text-xs font-normal text-slate-500">
+                  Hidden from upcoming events, shown in the public archive.
+                </span>
+              </span>
+            </label>
+
+
             <div className="flex flex-col-reverse sm:flex-row gap-3 pt-3 border-t border-slate-100">
               <button
                 onClick={() => setEditing(null)}
@@ -231,37 +270,56 @@ export default function AdminEvents() {
         </div>
       )}
 
+      {!loading && events.length > 0 && (
+        <ArchiveTabs
+          view={view}
+          onChange={setView}
+          activeCount={activeEvents.length}
+          archivedCount={archivedEvents.length}
+        />
+      )}
+
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-6 w-6 animate-spin text-teal" />
         </div>
-      ) : events.length === 0 ? (
+      ) : visible.length === 0 ? (
         <EmptyState
-          icon={<CalendarDays className="h-7 w-7" />}
-          title="No events yet"
-          description="Create your first event to start engaging MESA members."
+          icon={view === "archived" ? <Archive className="h-7 w-7" /> : <CalendarDays className="h-7 w-7" />}
+          title={view === "archived" ? "Archive is empty" : "No events yet"}
+          description={
+            view === "archived"
+              ? "Archived events will appear here and stay visible in the public archive."
+              : "Create your first event to start engaging MESA members."
+          }
           action={
-            <button
-              onClick={openNew}
-              className="inline-flex items-center gap-2 h-10 px-5 rounded-lg bg-teal text-teal-foreground font-semibold hover:opacity-90"
-            >
-              <Plus className="h-4 w-4" /> New Event
-            </button>
+            view === "archived" ? undefined : (
+              <button
+                onClick={openNew}
+                className="inline-flex items-center gap-2 h-10 px-5 rounded-lg bg-teal text-teal-foreground font-semibold hover:opacity-90"
+              >
+                <Plus className="h-4 w-4" /> New Event
+              </button>
+            )
           }
         />
       ) : (
         <div className="space-y-3">
-          {events.map((ev) => (
+          {visible.map((ev) => (
             <div
               key={ev.id}
-              className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow"
+              className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow ${
+                ev.archived ? "opacity-70" : ""
+              }`}
             >
               <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                 {ev.poster_url && (
                   <img
                     src={ev.poster_url}
                     alt=""
-                    className="h-14 w-14 sm:h-16 sm:w-16 object-cover rounded-lg shrink-0"
+                    className={`h-14 w-14 sm:h-16 sm:w-16 object-cover rounded-lg shrink-0 ${
+                      ev.archived ? "grayscale" : ""
+                    }`}
                   />
                 )}
                 <div className="flex-1 min-w-0">
@@ -273,16 +331,40 @@ export default function AdminEvents() {
                 </div>
               </div>
               <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+                {!ev.archived && isPastEvent(ev.event_date) && (
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-700">
+                    past
+                  </span>
+                )}
                 <span
                   className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                    ev.status === "published"
-                      ? "bg-teal text-teal-foreground"
-                      : "bg-slate-200 text-slate-700"
+                    ev.archived
+                      ? "bg-slate-200 text-slate-600"
+                      : ev.status === "published"
+                        ? "bg-teal text-teal-foreground"
+                        : "bg-slate-200 text-slate-700"
                   }`}
                 >
-                  {ev.status}
+                  {ev.archived ? "archived" : ev.status}
                 </span>
                 <div className="flex gap-1">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => toggleArchive(ev)}
+                        aria-label={ev.archived ? "Restore from archive" : "Archive"}
+                        className="h-10 w-10 inline-flex items-center justify-center rounded-md hover:bg-slate-100 text-slate-600"
+                      >
+                        {ev.archived ? (
+                          <ArchiveRestore className="h-4 w-4" />
+                        ) : (
+                          <Archive className="h-4 w-4" />
+                        )}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>{ev.archived ? "Restore" : "Archive"}</TooltipContent>
+                  </Tooltip>
+
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
