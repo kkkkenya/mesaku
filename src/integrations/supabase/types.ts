@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       announcements: {
         Row: {
+          archived: boolean
           created_at: string
           date: string
           description: string
@@ -25,6 +26,7 @@ export type Database = {
           title: string
         }
         Insert: {
+          archived?: boolean
           created_at?: string
           date: string
           description: string
@@ -34,6 +36,7 @@ export type Database = {
           title: string
         }
         Update: {
+          archived?: boolean
           created_at?: string
           date?: string
           description?: string
@@ -46,6 +49,7 @@ export type Database = {
       }
       events: {
         Row: {
+          archived: boolean
           created_at: string
           description: string | null
           event_date: string | null
@@ -58,6 +62,7 @@ export type Database = {
           venue: string | null
         }
         Insert: {
+          archived?: boolean
           created_at?: string
           description?: string | null
           event_date?: string | null
@@ -70,6 +75,7 @@ export type Database = {
           venue?: string | null
         }
         Update: {
+          archived?: boolean
           created_at?: string
           description?: string | null
           event_date?: string | null
@@ -85,6 +91,7 @@ export type Database = {
       }
       merchandise: {
         Row: {
+          archived: boolean
           created_at: string
           description: string | null
           featured: boolean
@@ -98,6 +105,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          archived?: boolean
           created_at?: string
           description?: string | null
           featured?: boolean
@@ -111,6 +119,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          archived?: boolean
           created_at?: string
           description?: string | null
           featured?: boolean
