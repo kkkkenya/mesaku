@@ -91,11 +91,27 @@ export default function AdminEvents() {
     fetchEvents();
   };
 
+  const toggleArchive = async (ev: Event) => {
+    const next = !ev.archived;
+    const { error } = await supabase.from("events").update({ archived: next }).eq("id", ev.id);
+    if (error) {
+      toast.error("Failed to update: " + error.message);
+      return;
+    }
+    toast.success(next ? "Event archived" : "Event restored");
+    fetchEvents();
+  };
+
   const remove = async (id: string) => {
     if (!confirm("Delete this event?")) return;
     await supabase.from("events").delete().eq("id", id);
     fetchEvents();
   };
+
+  const archivedEvents = events.filter((e) => e.archived);
+  const activeEvents = events.filter((e) => !e.archived);
+  const visible = view === "archived" ? archivedEvents : activeEvents;
+
 
   return (
     <div className="max-w-5xl">
