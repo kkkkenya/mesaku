@@ -24,6 +24,8 @@ export default function AdminEvents() {
   const [editing, setEditing] = useState<Partial<Event> | null>(null);
   const [saving, setSaving] = useState(false);
   const [posterFile, setPosterFile] = useState<File | null>(null);
+  const [view, setView] = useState<"active" | "archived">("active");
+
 
   const fetchEvents = async () => {
     setLoading(true);
