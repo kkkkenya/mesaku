@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadFile } from "@/lib/storage";
-import { Loader2, Plus, Pencil, Trash2, Eye, EyeOff, X, CalendarDays } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Eye, EyeOff, X, CalendarDays, Archive, ArchiveRestore } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import EmptyState from "@/components/admin/EmptyState";
+import ArchiveTabs from "@/components/admin/ArchiveTabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { isPastEvent } from "@/lib/archive";
 
 type Event = Tables<"events">;
+
 
 const inputCls =
   "w-full h-11 px-3.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-teal/40 focus:border-teal transition-colors";
