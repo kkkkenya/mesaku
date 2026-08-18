@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Pencil, Trash2, Plus, Megaphone } from "lucide-react";
+import { Pencil, Trash2, Plus, Megaphone, Archive, ArchiveRestore } from "lucide-react";
 import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import EmptyState from "@/components/admin/EmptyState";
+import ArchiveTabs from "@/components/admin/ArchiveTabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 type Announcement = {
@@ -12,6 +13,7 @@ type Announcement = {
   tag: "Announcement" | "Event" | "News" | "Update";
   date: string;
   published: boolean;
+  archived: boolean;
   created_at: string;
 };
 
@@ -22,6 +24,7 @@ type FormState = {
   tag: "Announcement" | "Event" | "News" | "Update";
   date: string;
   published: boolean;
+  archived: boolean;
 };
 
 const blankForm: FormState = {
@@ -30,6 +33,7 @@ const blankForm: FormState = {
   tag: "Announcement",
   date: "",
   published: false,
+  archived: false,
 };
 
 const inputCls =
@@ -43,6 +47,7 @@ export default function AdminAnnouncements() {
   const [errors, setErrors] = useState<{ [k: string]: string }>({});
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [view, setView] = useState<"active" | "archived">("active");
 
   const fetchAll = async () => {
     setLoading(true);
@@ -73,10 +78,16 @@ export default function AdminAnnouncements() {
       tag: row.tag,
       date: row.date,
       published: row.published,
+      archived: row.archived ?? false,
     });
     setErrors({});
     setSaveError(null);
     setMode("form");
+  };
+
+  const toggleArchive = async (row: Announcement) => {
+    await supabase.from("announcements").update({ archived: !row.archived }).eq("id", row.id);
+    fetchAll();
   };
 
   const handleDelete = async (row: Announcement) => {
@@ -104,6 +115,7 @@ export default function AdminAnnouncements() {
       tag: form.tag,
       date: form.date,
       published: form.published,
+      archived: form.archived,
     };
     const { error } = form.id
       ? await supabase.from("announcements").update(payload).eq("id", form.id)
@@ -116,6 +128,10 @@ export default function AdminAnnouncements() {
     setMode("list");
     fetchAll();
   };
+
+  const archivedItems = items.filter((i) => i.archived);
+  const activeItems = items.filter((i) => !i.archived);
+  const visible = view === "archived" ? archivedItems : activeItems;
 
   if (mode === "form") {
     return (
@@ -190,6 +206,16 @@ export default function AdminAnnouncements() {
             Publish immediately
           </label>
 
+          <label className="flex items-center gap-2.5 text-sm text-slate-700 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={form.archived}
+              onChange={(e) => setForm({ ...form, archived: e.target.checked })}
+              className="h-4 w-4 rounded border-slate-300 text-teal focus:ring-teal"
+            />
+            Archived (moved to the public archive)
+          </label>
+
           {saveError && <p className="text-red-600 text-sm">{saveError}</p>}
 
           <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2 border-t border-slate-100">
@@ -230,27 +256,42 @@ export default function AdminAnnouncements() {
         }
       />
 
+      {!loading && items.length > 0 && (
+        <ArchiveTabs
+          view={view}
+          onChange={setView}
+          activeCount={activeItems.length}
+          archivedCount={archivedItems.length}
+        />
+      )}
+
       {loading ? (
         <p className="text-slate-500">Loading…</p>
-      ) : items.length === 0 ? (
+      ) : visible.length === 0 ? (
         <EmptyState
-          icon={<Megaphone className="h-7 w-7" />}
-          title="No announcements yet"
-          description="Create your first announcement to keep MESA members informed."
+          icon={view === "archived" ? <Archive className="h-7 w-7" /> : <Megaphone className="h-7 w-7" />}
+          title={view === "archived" ? "Archive is empty" : "No announcements yet"}
+          description={
+            view === "archived"
+              ? "Archived announcements stay available in the public archive."
+              : "Create your first announcement to keep MESA members informed."
+          }
           action={
-            <button
-              onClick={startCreate}
-              className="inline-flex items-center gap-2 h-10 px-5 rounded-lg bg-teal text-teal-foreground font-semibold hover:opacity-90"
-            >
-              <Plus className="h-4 w-4" /> New Announcement
-            </button>
+            view === "archived" ? undefined : (
+              <button
+                onClick={startCreate}
+                className="inline-flex items-center gap-2 h-10 px-5 rounded-lg bg-teal text-teal-foreground font-semibold hover:opacity-90"
+              >
+                <Plus className="h-4 w-4" /> New Announcement
+              </button>
+            )
           }
         />
       ) : (
         <>
           {/* Mobile: stacked cards */}
           <div className="md:hidden space-y-3">
-            {items.map((row) => (
+            {visible.map((row) => (
               <div
                 key={row.id}
                 className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm"
@@ -274,6 +315,13 @@ export default function AdminAnnouncements() {
                   </span>
                 </div>
                 <div className="flex gap-2 pt-2 border-t border-slate-100">
+                  <button
+                    onClick={() => toggleArchive(row)}
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  >
+                    {row.archived ? <ArchiveRestore className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
+                    {row.archived ? "Restore" : "Archive"}
+                  </button>
                   <button
                     onClick={() => startEdit(row)}
                     className="flex-1 inline-flex items-center justify-center gap-1.5 h-9 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50"
@@ -304,7 +352,7 @@ export default function AdminAnnouncements() {
                 </tr>
               </thead>
               <tbody>
-                {items.map((row, i) => (
+                {visible.map((row, i) => (
                   <tr
                     key={row.id}
                     className={`border-t border-slate-100 transition-colors hover:bg-teal-soft/40 ${
@@ -329,6 +377,22 @@ export default function AdminAnnouncements() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end gap-1">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={() => toggleArchive(row)}
+                              className="p-2 hover:bg-slate-100 rounded-md text-slate-600"
+                              aria-label={row.archived ? "Restore from archive" : "Archive"}
+                            >
+                              {row.archived ? (
+                                <ArchiveRestore className="h-4 w-4" />
+                              ) : (
+                                <Archive className="h-4 w-4" />
+                              )}
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>{row.archived ? "Restore" : "Archive"}</TooltipContent>
+                        </Tooltip>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button
