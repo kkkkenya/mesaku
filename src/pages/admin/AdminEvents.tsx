@@ -235,6 +235,22 @@ export default function AdminEvents() {
               </select>
             </div>
 
+            <label className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={editing.archived ?? false}
+                onChange={(e) => setEditing({ ...editing, archived: e.target.checked })}
+                className="h-4 w-4 accent-teal"
+              />
+              <span className="text-sm font-semibold text-slate-700">
+                Archived
+                <span className="block text-xs font-normal text-slate-500">
+                  Hidden from upcoming events, shown in the public archive.
+                </span>
+              </span>
+            </label>
+
+
             <div className="flex flex-col-reverse sm:flex-row gap-3 pt-3 border-t border-slate-100">
               <button
                 onClick={() => setEditing(null)}
