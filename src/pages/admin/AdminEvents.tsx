@@ -306,17 +306,20 @@ export default function AdminEvents() {
       ) : (
         <div className="space-y-3">
           {visible.map((ev) => (
-
             <div
               key={ev.id}
-              className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow"
+              className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow ${
+                ev.archived ? "opacity-70" : ""
+              }`}
             >
               <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                 {ev.poster_url && (
                   <img
                     src={ev.poster_url}
                     alt=""
-                    className="h-14 w-14 sm:h-16 sm:w-16 object-cover rounded-lg shrink-0"
+                    className={`h-14 w-14 sm:h-16 sm:w-16 object-cover rounded-lg shrink-0 ${
+                      ev.archived ? "grayscale" : ""
+                    }`}
                   />
                 )}
                 <div className="flex-1 min-w-0">
@@ -328,16 +331,40 @@ export default function AdminEvents() {
                 </div>
               </div>
               <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+                {!ev.archived && isPastEvent(ev.event_date) && (
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-700">
+                    past
+                  </span>
+                )}
                 <span
                   className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                    ev.status === "published"
-                      ? "bg-teal text-teal-foreground"
-                      : "bg-slate-200 text-slate-700"
+                    ev.archived
+                      ? "bg-slate-200 text-slate-600"
+                      : ev.status === "published"
+                        ? "bg-teal text-teal-foreground"
+                        : "bg-slate-200 text-slate-700"
                   }`}
                 >
-                  {ev.status}
+                  {ev.archived ? "archived" : ev.status}
                 </span>
                 <div className="flex gap-1">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => toggleArchive(ev)}
+                        aria-label={ev.archived ? "Restore from archive" : "Archive"}
+                        className="h-10 w-10 inline-flex items-center justify-center rounded-md hover:bg-slate-100 text-slate-600"
+                      >
+                        {ev.archived ? (
+                          <ArchiveRestore className="h-4 w-4" />
+                        ) : (
+                          <Archive className="h-4 w-4" />
+                        )}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>{ev.archived ? "Restore" : "Archive"}</TooltipContent>
+                  </Tooltip>
+
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
