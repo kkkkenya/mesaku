@@ -64,6 +64,8 @@ export default function AdminEvents() {
       event_date: editing.event_date || null,
       poster_url,
       status: editing.status || "draft",
+      archived: editing.archived ?? false,
+
     };
 
     const result = editing.id
