@@ -116,81 +116,58 @@ const Events = () => {
             <div className="flex justify-center py-20">
               <Loader2 className="h-6 w-6 animate-spin text-[#1E3A8A]" />
             </div>
-          ) : events.length === 0 ? (
-            <p className="text-center text-gray-500 py-16">
-              No upcoming events right now. Check back soon!
-            </p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
-              {events.map((event) => {
-                const dateInfo = event.event_date ? formatDate(event.event_date) : null;
-                return (
-                  <div
-                    key={event.id}
-                    className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-500 flex flex-col border border-gray-100"
-                  >
-                    {event.poster_url && (
-                      <img
-                        src={event.poster_url}
-                        alt={`${event.title} - MESA KU event at Kenyatta University`}
-                        className="w-full h-48 object-cover"
-                        loading="lazy"
-                      />
-                    )}
-                    <div className="p-5 flex flex-col flex-1">
-                      <h3 className="font-heading text-lg font-bold text-[#1E3A8A] mb-1.5">
-                        {event.title}
-                      </h3>
-                      <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-3">
-                        {event.description}
+            <>
+              {upcoming.length === 0 ? (
+                <p className="text-center text-gray-500 py-16">
+                  No upcoming events right now. Check back soon!
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+                  {upcoming.map((event) => (
+                    <EventCard key={event.id} event={event} onAddToCalendar={setCalEvent} />
+                  ))}
+                </div>
+              )}
+
+              {archived.length > 0 && (
+                <section className="mt-14 pt-10 border-t border-gray-200">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+                    <div>
+                      <h2 className="font-heading text-xl md:text-2xl font-bold text-gray-700">
+                        Past &amp; Archived Events
+                      </h2>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Events that have already taken place.
                       </p>
-
-                      {dateInfo && (
-                        <div className="flex flex-wrap items-center gap-3 rounded-lg bg-gray-50 px-3.5 py-2.5 mb-4 text-sm text-gray-600">
-                          <span className="flex items-center gap-1.5 font-semibold text-gray-900">
-                            <CalendarCheck className="w-4 h-4 text-[#1E3A8A] shrink-0" />
-                            {dateInfo.day} {dateInfo.month} {dateInfo.year}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3.5 h-3.5 shrink-0" />
-                            {formatTime(event.event_date!)}
-                          </span>
-                          {event.venue && (
-                            <span className="flex items-center gap-1 truncate">
-                              <MapPin className="w-3.5 h-3.5 shrink-0" />
-                              <span className="truncate">{event.venue}</span>
-                            </span>
-                          )}
-                        </div>
-                      )}
-
-                      <div className="mt-auto flex flex-col gap-2">
-                        {event.rsvp_url && (
-                          <a
-                            href={event.rsvp_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-center gap-2 bg-[#1E3A8A] text-white h-11 rounded-lg text-sm font-semibold hover:bg-[#15498f] transition-colors w-full"
-                          >
-                            <CalendarCheck size={16} /> RSVP Now
-                            <ExternalLink size={13} className="opacity-80" aria-label="Opens in new tab" />
-                          </a>
-                        )}
-                        {event.event_date && (
-                          <button
-                            onClick={() => setCalEvent(event)}
-                            className="flex items-center justify-center gap-2 text-[#1E3A8A] h-11 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors w-full"
-                          >
-                            <CalendarPlus size={15} /> Add to Calendar
-                          </button>
-                        )}
-                      </div>
                     </div>
+                    <button
+                      onClick={() => setShowArchive((v) => !v)}
+                      aria-expanded={showArchive}
+                      className="inline-flex items-center gap-1.5 self-start h-11 px-4 rounded-lg border border-gray-200 text-sm font-semibold text-gray-700 hover:border-[#1E3A8A] hover:text-[#1E3A8A] transition-colors"
+                    >
+                      <Archive size={15} />
+                      {showArchive ? "Hide archive" : `View archive (${archived.length})`}
+                    </button>
                   </div>
-                );
-              })}
-            </div>
+
+                  {showArchive && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+                      {archived.map((event) => (
+                        <EventCard
+                          key={event.id}
+                          event={event}
+                          past
+                          onAddToCalendar={setCalEvent}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </section>
+              )}
+            </>
           )}
+
         </div>
       </main>
       <Footer />
