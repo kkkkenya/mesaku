@@ -270,27 +270,43 @@ export default function AdminEvents() {
         </div>
       )}
 
+      {!loading && events.length > 0 && (
+        <ArchiveTabs
+          view={view}
+          onChange={setView}
+          activeCount={activeEvents.length}
+          archivedCount={archivedEvents.length}
+        />
+      )}
+
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-6 w-6 animate-spin text-teal" />
         </div>
-      ) : events.length === 0 ? (
+      ) : visible.length === 0 ? (
         <EmptyState
-          icon={<CalendarDays className="h-7 w-7" />}
-          title="No events yet"
-          description="Create your first event to start engaging MESA members."
+          icon={view === "archived" ? <Archive className="h-7 w-7" /> : <CalendarDays className="h-7 w-7" />}
+          title={view === "archived" ? "Archive is empty" : "No events yet"}
+          description={
+            view === "archived"
+              ? "Archived events will appear here and stay visible in the public archive."
+              : "Create your first event to start engaging MESA members."
+          }
           action={
-            <button
-              onClick={openNew}
-              className="inline-flex items-center gap-2 h-10 px-5 rounded-lg bg-teal text-teal-foreground font-semibold hover:opacity-90"
-            >
-              <Plus className="h-4 w-4" /> New Event
-            </button>
+            view === "archived" ? undefined : (
+              <button
+                onClick={openNew}
+                className="inline-flex items-center gap-2 h-10 px-5 rounded-lg bg-teal text-teal-foreground font-semibold hover:opacity-90"
+              >
+                <Plus className="h-4 w-4" /> New Event
+              </button>
+            )
           }
         />
       ) : (
         <div className="space-y-3">
-          {events.map((ev) => (
+          {visible.map((ev) => (
+
             <div
               key={ev.id}
               className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow"
