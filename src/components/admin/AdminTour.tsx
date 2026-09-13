@@ -220,8 +220,24 @@ export default function AdminTour({ open, onClose }: Props) {
       {/* Tooltip card */}
       <div
         key={`${animKey}-${direction}`}
-        className="absolute pointer-events-auto rounded-2xl sm:rounded-xl bg-white shadow-2xl animate-tour-in max-h-[85vh] overflow-y-auto"
-        style={isMobile ? tipStyle : { ...tipStyle, width: TOOLTIP_W }}
+        className={`absolute pointer-events-auto rounded-2xl sm:rounded-xl bg-white shadow-2xl max-h-[85vh] ${
+          isFinal ? "flex flex-col overflow-hidden" : "overflow-y-auto"
+        }`}
+        style={
+          isMobile
+            ? { ...tipStyle, animation: "tour-fade 0.22s ease-out both" }
+            : {
+                ...tipStyle,
+                width: TOOLTIP_W,
+                // The step entrance animation animates `transform`, which would
+                // override the translate(-50%,-50%) centering of the final
+                // screen and push its buttons below the viewport — so the
+                // final card fades instead of sliding.
+                animation: isFinal
+                  ? "tour-fade 0.22s ease-out both"
+                  : "tour-in 0.22s ease-out both",
+              }
+        }
         role="dialog"
         aria-modal="true"
         aria-labelledby="tour-title"
@@ -326,8 +342,8 @@ export default function AdminTour({ open, onClose }: Props) {
               </p>
             </div>
 
-            {/* Quick reference grid */}
-            <div className="grid grid-cols-2 gap-2 p-4">
+            {/* Quick reference grid — scrolls if space is tight, buttons stay visible */}
+            <div className="grid grid-cols-2 gap-2 p-4 overflow-y-auto min-h-0">
               {FINAL_QUICK_REF.map((item) => (
                 <div
                   key={item.label}
@@ -341,7 +357,7 @@ export default function AdminTour({ open, onClose }: Props) {
               ))}
             </div>
 
-            <div className="px-4 pb-4 flex flex-col gap-2">
+            <div className="px-4 pb-4 pt-3 flex flex-col gap-2 shrink-0">
               <button
                 type="button"
                 onClick={finish}
@@ -368,6 +384,10 @@ export default function AdminTour({ open, onClose }: Props) {
           to   { opacity: 1; transform: translateY(0) scale(1); }
         }
         .animate-tour-in { animation: tour-in 0.22s ease-out both; }
+        @keyframes tour-fade {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
       `}</style>
     </div>
   );
