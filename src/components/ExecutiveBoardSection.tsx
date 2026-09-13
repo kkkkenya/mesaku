@@ -1,54 +1,33 @@
-// ────────────────────────────────────────────────────────────────
-// EXECUTIVE BOARD — easy image override
-// ────────────────────────────────────────────────────────────────
-// To set a member's photo, drop the file into `src/assets/`, import
-// it at the top of this file, and add `image: yourImg` to that
-// member's entry below. Members without an `image` show a plain
-// light-gray placeholder card.
-// ────────────────────────────────────────────────────────────────
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
+import { bundledPhotos } from "@/data/executivePhotos";
 
-import { useState } from "react";
-import isaacImg from "@/assets/exec-isaac.png";
-import gregoryImg from "@/assets/exec-gregory.png";
-import wisemanImg from "@/assets/exec-wiseman.png";
-import lewisImg from "@/assets/exec-lewis.png";
-import noelynImg from "@/assets/exec-noelyn.png";
-import teddyImg from "@/assets/exec-teddy.png";
-import gloriaImg from "@/assets/exec-gloria.png";
-import godwinImg from "@/assets/exec-godwin.png";
-import stephenImg from "@/assets/exec-stephen.png";
-import lyneforImg from "@/assets/exec-lyneford.png";
+type Executive = Tables<"executives">;
 
-interface Executive {
-  id: number;
-  name: string;
-  role: string;
-  image?: string;
-}
-
-const executives: Executive[] = [
-  { id: 1,  name: "Isaac Omondi Ogweno",     role: "Chairman, MESA",            image: isaacImg },
-  { id: 2,  name: "Gregory Muhoro",          role: "Deputy Chair",              image: gregoryImg },
-  { id: 3,  name: "Wiseman Kaberia",         role: "Deputy Secretary General",  image: wisemanImg },
-  { id: 4,  name: "Lyneford Muriithi",       role: "Treasurer",                 image: lyneforImg },
-  { id: 5,  name: "Godwin Fadhili Imbala",   role: "Publicity Secretary",       image: godwinImg },
-  { id: 6,  name: "Lewis Kimani",            role: "Industrial Lead",           image: lewisImg },
-  { id: 7,  name: "Stephen Kamau G",         role: "Organizing Secretary",      image: stephenImg },
-  { id: 8,  name: "Teddy Odhiambo Onyango",  role: "1st Year Representative",   image: teddyImg },
-  { id: 9,  name: "Gloria",                  role: "4th Year Representative",   image: gloriaImg },
-  { id: 10, name: "Kituyi Noelyn Nasimiyu",  role: "Assistant Publicity Lead",  image: noelynImg },
+// Shown only if the database fetch fails, so the homepage never loses
+// its leadership section.
+const fallbackExecutives: Executive[] = [
+  { id: "2d506c16-4bf5-4e43-a2c3-e75f66e0cd85", name: "Isaac Omondi Ogweno",    role: "Chairman, MESA",           image_url: null, order_index: 1, archived: false, created_at: "" },
+  { id: "caf9340b-3160-4bf8-a215-445c93c45538", name: "Gregory Muhoro",         role: "Deputy Chair",             image_url: null, order_index: 2, archived: false, created_at: "" },
+  { id: "31eebb2f-623e-4d68-8fb8-adb58bea106c", name: "Wiseman Kaberia",        role: "Deputy Secretary General", image_url: null, order_index: 3, archived: false, created_at: "" },
+  { id: "92519cdd-17a4-4467-8868-3873726828be", name: "Lyneford Muriithi",      role: "Treasurer",                image_url: null, order_index: 4, archived: false, created_at: "" },
+  { id: "4d91ca50-db83-4ae1-b2b8-2db736a74e8b", name: "Godwin Fadhili Imbala",  role: "Publicity Secretary",      image_url: null, order_index: 5, archived: false, created_at: "" },
+  { id: "11892945-9035-47e2-b8ea-6769b88f6056", name: "Lewis Kimani",           role: "Industrial Lead",          image_url: null, order_index: 6, archived: false, created_at: "" },
+  { id: "0a340510-6896-4e5e-b265-6e34055074dc", name: "Stephen Kamau G",        role: "Organizing Secretary",     image_url: null, order_index: 7, archived: false, created_at: "" },
+  { id: "c5a6fe83-fc20-408a-8f82-e2d963e0b10f", name: "Teddy Odhiambo Onyango", role: "1st Year Representative",  image_url: null, order_index: 8, archived: false, created_at: "" },
+  { id: "1f493c33-bb48-4970-a92b-fd3c62e3f55b", name: "Gloria",                 role: "4th Year Representative",  image_url: null, order_index: 9, archived: false, created_at: "" },
+  { id: "386c7a8a-66ce-4724-9586-8aa795c39d3d", name: "Kituyi Noelyn Nasimiyu", role: "Assistant Publicity Lead", image_url: null, order_index: 10, archived: false, created_at: "" },
 ];
 
 function MemberCard({
   name,
   role,
   image,
-  index,
 }: {
   name: string;
   role: string;
   image?: string;
-  index: number;
 }) {
   const [loaded, setLoaded] = useState(false);
 
@@ -106,7 +85,39 @@ function MemberCard({
   );
 }
 
+function photoFor(exec: Executive): string | undefined {
+  return exec.image_url ?? bundledPhotos[exec.id] ?? undefined;
+}
+
 export default function ExecutiveBoardSection() {
+  const [executives, setExecutives] = useState<Executive[] | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from("executives")
+        .select("*")
+        .eq("archived", false)
+        .order("order_index", { ascending: true });
+      if (cancelled) return;
+      if (error) {
+        console.error("Failed to load executive board:", error);
+        setFailed(true);
+      }
+      setExecutives(data ?? []);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const board = executives === null ? null : failed && executives.length === 0 ? fallbackExecutives : executives;
+
+  // Board removed entirely — don't render an empty section.
+  if (board !== null && board.length === 0) return null;
+
   return (
     <section id="executive-board" className="py-16 bg-white">
       <style>{`.carousel-hide-scrollbar::-webkit-scrollbar { display: none; }`}</style>
@@ -122,17 +133,25 @@ export default function ExecutiveBoardSection() {
           </h2>
         </div>
 
-        {/* Desktop grid: 5 columns × 2 rows */}
+        {/* Desktop grid: 5 columns */}
         <div className="hidden md:grid grid-cols-5 gap-4">
-          {executives.map((exec, idx) => (
-            <MemberCard
-              key={exec.id}
-              name={exec.name}
-              role={exec.role}
-              image={exec.image}
-              index={idx}
-            />
-          ))}
+          {(board ?? Array.from({ length: 10 })).map((exec, idx) =>
+            exec ? (
+              <MemberCard
+                key={exec.id}
+                name={exec.name}
+                role={exec.role}
+                image={photoFor(exec)}
+              />
+            ) : (
+              // Loading skeleton — same silhouette as a photo-less card
+              <div
+                key={`skeleton-${idx}`}
+                className="w-full bg-gray-100 rounded-sm"
+                style={{ aspectRatio: "3 / 4" }}
+              />
+            )
+          )}
         </div>
 
         {/* Mobile horizontal carousel */}
@@ -140,11 +159,19 @@ export default function ExecutiveBoardSection() {
           className="carousel-hide-scrollbar flex md:hidden overflow-x-auto gap-3 pb-4 snap-x snap-mandatory scroll-smooth -mx-4 px-4"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          {executives.map((exec, idx) => (
-            <div key={exec.id} className="flex-shrink-0 w-[200px] snap-start">
-              <MemberCard name={exec.name} role={exec.role} image={exec.image} index={idx} />
-            </div>
-          ))}
+          {(board ?? Array.from({ length: 5 })).map((exec, idx) =>
+            exec ? (
+              <div key={exec.id} className="flex-shrink-0 w-[200px] snap-start">
+                <MemberCard name={exec.name} role={exec.role} image={photoFor(exec)} />
+              </div>
+            ) : (
+              <div
+                key={`skeleton-${idx}`}
+                className="flex-shrink-0 w-[200px] bg-gray-100 rounded-sm"
+                style={{ aspectRatio: "3 / 4" }}
+              />
+            )
+          )}
         </div>
       </div>
     </section>

@@ -15,7 +15,7 @@ const STEPS: Step[] = [
   {
     selector: '[data-tour="sidebar"]',
     title: "Welcome to the MESA KU Admin Panel",
-    body: "This is your control centre. Everything on the public website — events, merchandise, announcements, and the newsletter — is managed from this sidebar. You'll spend most of your time here.",
+    body: "This is your control centre. Everything on the public website — events, merchandise, announcements, the executive board, and the newsletter — is managed from this sidebar. You'll spend most of your time here.",
     tip: "Changes you make here are reflected on the live site at mesa.co.ke immediately after saving.",
   },
   {
@@ -37,10 +37,22 @@ const STEPS: Step[] = [
     tip: "The homepage only shows the 3 most recent published announcements. Older ones are visible on the full /announcements page.",
   },
   {
+    selector: '[data-tour="nav-executives"]',
+    title: "Managing the Executive Board",
+    body: "Update the leadership team shown on the homepage. Each member has a name, position, and photo — edit any of them, add new members, or use the arrows to control the order they appear in. Archiving hides a member from the public site without deleting them.",
+    tip: "The homepage board updates the moment you save — no redeploy needed. Portrait photos (3:4) look best.",
+  },
+  {
     selector: '[data-tour="nav-newsletter"]',
     title: "Newsletter & Subscribers",
     body: "View everyone who has subscribed via the homepage newsletter form. From here you can see subscriber emails and send campaign updates. If Mailchimp is connected, you can broadcast directly — always send yourself a test email first.",
     tip: "Subscribers signed up to hear from MESA KU specifically. Keep emails relevant — events, announcements, and opportunities only.",
+  },
+  {
+    selector: '[data-tour="nav-assets"]',
+    title: "Asset Library",
+    body: "Logos, photos, and documents (PDF) — like the constitution and handbook — live here. Download any file or copy its link to drop straight into a newsletter campaign or a poster draft. Uploads accept images and PDFs up to 10 MB.",
+    tip: "Use 'Copy link' to grab a file's URL for Mailchimp campaigns — no need to re-upload the same logo twice.",
   },
   {
     selector: null,
@@ -54,7 +66,10 @@ const FINAL_QUICK_REF = [
   { icon: "📅", label: "Events", desc: "Create & publish events" },
   { icon: "🛍️", label: "Merch", desc: "Manage products & prices" },
   { icon: "📢", label: "Announcements", desc: "Post news & updates" },
+  { icon: "👥", label: "Executives", desc: "Update the leadership team" },
   { icon: "✉️", label: "Newsletter", desc: "View subscribers & send" },
+  { icon: "📁", label: "Assets", desc: "Logos, photos & documents" },
+  { icon: "📖", label: "Guide & FAQ", desc: "Help, FAQ & error fixes" },
 ];
 
 interface Props {

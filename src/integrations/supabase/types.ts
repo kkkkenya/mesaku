@@ -47,6 +47,36 @@ export type Database = {
         }
         Relationships: []
       }
+      assets: {
+        Row: {
+          category: string
+          created_at: string
+          file_url: string
+          id: string
+          mime: string
+          name: string
+          size_bytes: number | null
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          file_url: string
+          id?: string
+          mime?: string
+          name: string
+          size_bytes?: number | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          file_url?: string
+          id?: string
+          mime?: string
+          name?: string
+          size_bytes?: number | null
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           archived: boolean
@@ -86,6 +116,36 @@ export type Database = {
           title?: string
           updated_at?: string
           venue?: string | null
+        }
+        Relationships: []
+      }
+      executives: {
+        Row: {
+          archived: boolean
+          created_at: string
+          id: string
+          image_url: string | null
+          name: string
+          order_index: number
+          role: string
+        }
+        Insert: {
+          archived?: boolean
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          name: string
+          order_index?: number
+          role: string
+        }
+        Update: {
+          archived?: boolean
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          name?: string
+          order_index?: number
+          role?: string
         }
         Relationships: []
       }

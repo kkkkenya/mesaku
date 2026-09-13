@@ -1,10 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import { X, CheckCircle, Loader2, AlertCircle, Mail } from "lucide-react";
+import { X, CheckCircle, Loader2, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import mesaLogo from "@/assets/mesa-logo.png";
 
 const COOKIE_DISMISSED = "mesa_popup_dismissed";
 const COOKIE_SUBSCRIBED = "mesa_popup_subscribed";
+
+// Palette — measured against WCAG AA:
+//   ink #12203A on paper        16.2:1   secondary #44536B on paper 7.8:1
+//   muted #64748B on paper       4.8:1   error #B42318 on paper    6.6:1
+//   white on navy #0F172A       17.9:1   white/65 on navy          ~8:1
+//   brass #D4A017 on navy        7.5:1   white on CTA #2563EB      4.5:1
+const INK = "#12203A";
+const INK_SECONDARY = "#44536B";
+const NAVY = "#0F172A";
 
 const setCookie = (name: string, value: string, days: number) => {
   try {
@@ -26,21 +35,34 @@ const prefersReducedMotion = () =>
   typeof window !== "undefined" &&
   window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
+type Notice = { kind: "error" | "info"; msg: string } | null;
+
+type SubscribeResponse = { success?: boolean; error?: string };
+
+const isAlreadySubscribed = (msg: string) =>
+  msg.includes("already") ||
+  msg.includes("exist") ||
+  msg.includes("duplicate") ||
+  msg.includes("member exists");
+
 const NewsletterPopup = () => {
   const [open, setOpen] = useState(false);
   const [visible, setVisible] = useState(false);
   const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
+  const [notice, setNotice] = useState<Notice>(null);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [isMobile, setIsMobile] = useState(
     typeof window !== "undefined" ? window.innerWidth < 768 : false,
   );
+  const [dragOffset, setDragOffset] = useState<number | null>(null);
 
   const cardRef = useRef<HTMLDivElement>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
+  const touchStartY = useRef(0);
 
   // Track viewport for mobile threshold + bottom-sheet rendering
   useEffect(() => {
@@ -116,7 +138,9 @@ const NewsletterPopup = () => {
     setTimeout(() => setOpen(false), reduced ? 0 : 350);
   };
 
-  // Esc + focus trap + body lock
+  // Esc + focus trap + body lock. The input takes focus on desktop only —
+  // on mobile the sheet sits at the bottom edge and an auto-opened keyboard
+  // would cover it.
   useEffect(() => {
     if (!open) return;
 
@@ -124,9 +148,11 @@ const NewsletterPopup = () => {
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
-    setTimeout(() => {
-      (inputRef.current ?? closeBtnRef.current)?.focus();
-    }, 60);
+    if (!isMobile) {
+      setTimeout(() => {
+        (inputRef.current ?? closeBtnRef.current)?.focus();
+      }, 60);
+    }
 
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -167,50 +193,74 @@ const NewsletterPopup = () => {
     e.preventDefault();
     if (loading) return;
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Please enter a valid email address.");
+      setNotice({ kind: "error", msg: "Please enter a valid email address." });
       return;
     }
-    setError("");
+    setNotice(null);
     setLoading(true);
     try {
-      const { data, error: fnError } = await supabase.functions.invoke(
-        "subscribe-mailchimp",
-        { body: { email } },
-      );
+      const { data, error: fnError } = await supabase.functions.invoke<
+        SubscribeResponse | null
+      >("subscribe-mailchimp", { body: { email } });
       if (fnError) {
-        const ctx: any = (fnError as any).context;
         let serverMsg = "";
         try {
-          const json = await ctx?.json?.();
-          serverMsg = json?.error || "";
+          const ctx = (fnError as { context?: Response }).context;
+          if (ctx) {
+            const json = (await ctx.json()) as { error?: string };
+            serverMsg = json?.error || "";
+          }
         } catch {
           // ignore
         }
         const msg = (serverMsg || fnError.message || "").toLowerCase();
-        if (msg.includes("already") || msg.includes("exist") || msg.includes("duplicate") || msg.includes("member exists")) {
-          setError("Looks like you're already subscribed! 🎉");
-        } else {
-          setError(serverMsg || fnError.message || "Subscription failed. Please try again.");
-        }
+        setNotice(
+          isAlreadySubscribed(msg)
+            ? { kind: "info", msg: "You're already on the list." }
+            : {
+                kind: "error",
+                msg: serverMsg || fnError.message || "Subscription failed. Please try again.",
+              },
+        );
         setLoading(false);
         return;
       }
-      if ((data as any)?.success) {
+      if (data?.success) {
         setSubmitted(true);
         setCookie(COOKIE_SUBSCRIBED, "true", 365);
-        setTimeout(() => close(false), 3000);
+        setTimeout(() => close(false), 6000);
       } else {
-        const msg = ((data as any)?.error || "").toLowerCase();
-        if (msg.includes("already") || msg.includes("exist") || msg.includes("member exists")) {
-          setError("Looks like you're already subscribed! 🎉");
-        } else {
-          setError((data as any)?.error || "Subscription failed. Please try again.");
-        }
+        const msg = (data?.error || "").toLowerCase();
+        setNotice(
+          isAlreadySubscribed(msg)
+            ? { kind: "info", msg: "You're already on the list." }
+            : {
+                kind: "error",
+                msg: data?.error || "Subscription failed. Please try again.",
+              },
+        );
       }
     } catch {
-      setError("Network error. Please try again.");
+      setNotice({ kind: "error", msg: "Network error. Please try again." });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Swipe-to-dismiss on mobile — drag the navy header strip downward.
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    const dy = e.touches[0].clientY - touchStartY.current;
+    if (dy > 0) setDragOffset(dy);
+  };
+  const onTouchEnd = () => {
+    if (dragOffset !== null && dragOffset > 110) {
+      setDragOffset(0);
+      close();
+    } else {
+      setDragOffset(null);
     }
   };
 
@@ -220,27 +270,39 @@ const NewsletterPopup = () => {
 
   // Backdrop
   const backdropStyle: React.CSSProperties = {
-    backgroundColor: "rgba(2, 6, 23, 0.6)",
+    backgroundColor: "rgba(2, 6, 23, 0.55)",
     backdropFilter: "blur(8px)",
     WebkitBackdropFilter: "blur(8px)",
     opacity: reduced ? 1 : visible ? 1 : 0,
     transition: reduced ? undefined : "opacity 300ms ease",
   };
 
-  // Card animation
+  // Card animation — drag follows the finger on mobile, no transition then
   const cardEase = "cubic-bezier(0.16, 1, 0.3, 1)";
+  const dragging = dragOffset !== null && dragOffset > 0;
   const cardStyle: React.CSSProperties = isMobile
     ? {
-        transform: visible ? "translateY(0)" : "translateY(100%)",
-        opacity: reduced ? 1 : visible ? 1 : 0,
-        transition: reduced ? undefined : `transform 350ms ${cardEase}, opacity 300ms ease`,
-        maxHeight: "55vh",
+        transform: visible
+          ? `translateY(${dragOffset ?? 0}px)`
+          : "translateY(100%)",
+        opacity: reduced || dragging ? 1 : visible ? 1 : 0,
+        transition:
+          reduced || dragging
+            ? undefined
+            : `transform 350ms ${cardEase}, opacity 300ms ease`,
+        maxHeight: "85dvh",
       }
     : {
         transform: visible ? "translateY(0)" : "translateY(20px)",
         opacity: reduced ? 1 : visible ? 1 : 0,
         transition: reduced ? undefined : `transform 350ms ${cardEase}, opacity 350ms ease`,
       };
+
+  const eyebrow = (
+    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#8A6A14]">
+      Newsletter
+    </p>
+  );
 
   return (
     <div
@@ -257,171 +319,236 @@ const NewsletterPopup = () => {
     >
       <div
         ref={cardRef}
-        className={`relative bg-[#0f172a] text-white shadow-2xl overflow-hidden border border-white/10 ${
+        className={`relative flex w-full overflow-hidden bg-white shadow-2xl ${
           isMobile
-            ? "w-full rounded-t-2xl"
-            : "w-full max-w-3xl rounded-2xl"
+            ? "max-w-md flex-col rounded-t-2xl"
+            : "max-w-2xl rounded-2xl"
         }`}
         style={cardStyle}
       >
-        {/* Mobile drag handle */}
-        {isMobile && (
-          <div className="flex justify-center pt-2.5 pb-1">
-            <span className="block h-1.5 w-12 rounded-full bg-white/25" />
+        {/* ── Desktop drafting-sheet panel ── */}
+        {!isMobile && (
+          <div
+            className="relative flex w-[240px] lg:w-[270px] shrink-0 flex-col items-center justify-center overflow-hidden px-7 py-10"
+            style={{ backgroundColor: NAVY }}
+          >
+            {/* Blueprint grid — MESA's drafting motif */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 opacity-[0.14]"
+              style={{
+                backgroundImage:
+                  "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
+                backgroundSize: "28px 28px",
+                maskImage:
+                  "radial-gradient(circle at center, black 30%, transparent 78%)",
+                WebkitMaskImage:
+                  "radial-gradient(circle at center, black 30%, transparent 78%)",
+              }}
+            />
+            <div className="relative flex flex-col items-center text-center">
+              <div className="flex h-20 w-20 items-center justify-center rounded-xl border border-white/15 bg-white/5">
+                <img
+                  src={mesaLogo}
+                  alt=""
+                  className="h-14 w-14 object-contain"
+                />
+              </div>
+              <p className="mt-5 font-heading text-xl font-semibold text-white">
+                MESA KU
+              </p>
+              {/* Title block, like an engineering drawing */}
+              <div className="mt-4 w-full border-t border-white/15 pt-4">
+                <p className="text-[11px] font-medium uppercase leading-relaxed tracking-[0.18em] text-white/65">
+                  Mechanical Engineering
+                  <br />
+                  Students Association
+                </p>
+                <p className="mt-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#D4A017]">
+                  Kenyatta University
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Close button */}
+        {/* ── Form panel ── */}
+        <div
+          className={`flex flex-1 flex-col justify-center ${
+            isMobile
+              ? "p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]"
+              : "p-7 sm:p-8 md:p-9"
+          }`}
+        >
+          {submitted ? (
+            <div className="flex flex-col items-center gap-3 py-6 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                <CheckCircle className="text-primary" size={30} />
+              </div>
+              <h2
+                id="newsletter-popup-title"
+                className="font-heading text-2xl font-bold"
+                style={{ color: INK }}
+              >
+                You're in.
+              </h2>
+              <p className="text-sm" style={{ color: INK_SECONDARY }}>
+                We'll keep you updated at {email}.
+              </p>
+              <button
+                type="button"
+                onClick={() => close(false)}
+                className="mt-2 h-11 rounded-md bg-primary px-10 font-semibold text-primary-foreground transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1E3A8A]/40"
+              >
+                Done
+              </button>
+            </div>
+          ) : (
+            <>
+              {isMobile && (
+                <>
+                  {/* Draggable navy strip — grabber is real: drag down to dismiss */}
+                  <div
+                    ref={stripRef}
+                    onTouchStart={onTouchStart}
+                    onTouchMove={onTouchMove}
+                    onTouchEnd={onTouchEnd}
+                    className="relative -mx-5 -mt-5 mb-5 cursor-grab px-5 pb-4 pt-2.5 active:cursor-grabbing"
+                    style={{ backgroundColor: NAVY, touchAction: "none" }}
+                  >
+                    <span
+                      aria-hidden
+                      className="mx-auto block h-1.5 w-10 rounded-full bg-white/30"
+                    />
+                    <div className="mt-3.5 flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/15 bg-white/5">
+                        <img
+                          src={mesaLogo}
+                          alt=""
+                          className="h-6 w-6 object-contain"
+                        />
+                      </div>
+                      <div>
+                        <p className="font-heading text-base font-semibold leading-tight text-white">
+                          MESA KU
+                        </p>
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#D4A017]">
+                          Newsletter
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <h2
+                    id="newsletter-popup-title"
+                    className="font-heading text-[26px] font-bold leading-snug"
+                    style={{ color: INK }}
+                  >
+                    Never miss what we build next.
+                  </h2>
+                </>
+              )}
+
+              {!isMobile && (
+                <>
+                  <div className="flex items-center justify-between gap-4">
+                    {eyebrow}
+                    <span className="h-px flex-1 bg-[#E2E8F0]" aria-hidden />
+                  </div>
+                  <h2
+                    id="newsletter-popup-title"
+                    className="mt-3 font-heading text-3xl font-bold leading-tight"
+                    style={{ color: INK }}
+                  >
+                    Never miss what we build next.
+                  </h2>
+                </>
+              )}
+
+              <p
+                className={`font-heading italic leading-relaxed ${
+                  isMobile ? "mt-2 text-[15px]" : "mt-3 text-base"
+                }`}
+                style={{ color: INK_SECONDARY }}
+              >
+                Events, workshops, competitions, and opportunities — about
+                twice a month, straight to your inbox.
+              </p>
+
+              <form noValidate onSubmit={handleSubmit} className={isMobile ? "mt-5 space-y-3" : "mt-6 space-y-3"}>
+                <input
+                  ref={inputRef}
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  aria-label="Email address"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setNotice(null);
+                  }}
+                  placeholder="Your email address"
+                  disabled={loading}
+                  className="h-12 w-full rounded-md border border-[#7C8AA0] bg-white px-4 text-base transition-colors placeholder:text-[#64748B] focus:border-[#1E3A8A] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/25 disabled:opacity-60"
+                  style={{ color: INK }}
+                />
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-primary font-semibold text-primary-foreground transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1E3A8A]/40 disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="animate-spin" size={18} />
+                      Subscribing…
+                    </>
+                  ) : (
+                    "Subscribe"
+                  )}
+                </button>
+
+                <div className="min-h-[22px]" aria-live="polite">
+                  {notice && (
+                    <p
+                      className={`inline-flex items-center gap-1.5 text-sm ${
+                        notice.kind === "error" ? "text-[#B42318]" : "text-[#1E3A8A]"
+                      }`}
+                    >
+                      {notice.kind === "error" ? (
+                        <AlertCircle size={14} />
+                      ) : (
+                        <CheckCircle size={14} />
+                      )}
+                      {notice.msg}
+                    </p>
+                  )}
+                </div>
+              </form>
+
+              <p className="mt-1 text-xs" style={{ color: "#64748B" }}>
+                No spam. Unsubscribe anytime.
+              </p>
+            </>
+          )}
+        </div>
+
+        {/* ── Close ── */}
         <button
           ref={closeBtnRef}
           type="button"
           onClick={() => close()}
           aria-label="Close newsletter popup"
-          className="absolute top-3 right-3 z-20 inline-flex items-center justify-center h-9 w-9 rounded-full bg-white/5 text-white/70 hover:bg-white/15 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className={`absolute right-2 top-2 inline-flex items-center justify-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 ${
+            isMobile
+              ? "h-11 w-11 text-white/70 hover:bg-white/10 focus-visible:ring-[#D4A017]"
+              : "right-3 top-3 h-9 w-9 text-[#44536B] hover:bg-slate-100 focus-visible:ring-[#1E3A8A]/40"
+          }`}
         >
-          <X size={18} />
+          <X size={isMobile ? 20 : 18} />
         </button>
-
-        <div className={`grid ${isMobile ? "grid-cols-1" : "md:grid-cols-2"}`}>
-          {/* Left visual panel — desktop only */}
-          {!isMobile && (
-            <div
-              className="relative hidden md:flex flex-col items-center justify-center p-8 overflow-hidden"
-              style={{
-                background:
-                  "radial-gradient(circle at 30% 20%, hsl(var(--primary) / 0.35), transparent 60%), radial-gradient(circle at 70% 80%, #1e3a8a 0%, #0b1226 70%)",
-              }}
-            >
-              {/* engineering grid */}
-              <div
-                className="absolute inset-0 opacity-[0.18] pointer-events-none"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px)",
-                  backgroundSize: "32px 32px",
-                  maskImage:
-                    "radial-gradient(circle at center, black 40%, transparent 75%)",
-                }}
-              />
-              {/* Glow */}
-              <div
-                className="absolute -inset-10 pointer-events-none"
-                style={{
-                  background:
-                    "radial-gradient(circle, hsl(var(--primary) / 0.45) 0%, transparent 60%)",
-                  animation: reduced ? undefined : "popupGlow 4s ease-in-out infinite",
-                  filter: "blur(40px)",
-                }}
-              />
-              <div className="relative z-10 flex flex-col items-center text-center">
-                <div className="h-28 w-28 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/15 flex items-center justify-center shadow-xl">
-                  <img
-                    src={mesaLogo}
-                    alt="MESA KU logo"
-                    className="h-20 w-20 object-contain"
-                  />
-                </div>
-                <p className="mt-6 font-heading text-xl font-semibold text-white">
-                  MESA KU
-                </p>
-                <p className="mt-1 text-xs uppercase tracking-[3px] text-white/60">
-                  Engineering Excellence
-                </p>
-                <div className="mt-6 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs text-white/85">
-                  <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                  200+ Members
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Right form panel */}
-          <div className="p-6 sm:p-8 md:p-10">
-            {submitted ? (
-              <div className="flex flex-col items-center text-center gap-3 py-6">
-                <div className="h-14 w-14 rounded-full bg-primary/15 flex items-center justify-center">
-                  <CheckCircle className="text-primary" size={32} />
-                </div>
-                <h2
-                  id="newsletter-popup-title"
-                  className="font-heading text-2xl font-bold"
-                >
-                  You're in!
-                </h2>
-                <p className="text-sm text-white/70">
-                  Welcome to the MESA KU community.
-                </p>
-              </div>
-            ) : (
-              <>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/15 text-primary text-xs font-medium border border-primary/30">
-                  <Mail size={12} /> MESA KU Newsletter
-                </span>
-                <h2
-                  id="newsletter-popup-title"
-                  className="mt-3 font-heading text-2xl sm:text-3xl font-bold leading-tight text-white"
-                >
-                  Don't Miss What's Next
-                </h2>
-                <p className="mt-2 text-sm sm:text-[15px] text-white/70 leading-relaxed">
-                  Get the latest MESA KU events, workshops, competitions, and
-                  opportunities — straight to your inbox.
-                </p>
-
-                <form onSubmit={handleSubmit} className="mt-5 space-y-3">
-                  <input
-                    ref={inputRef}
-                    type="email"
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      setError("");
-                    }}
-                    placeholder="Your university email"
-                    disabled={loading}
-                    className="w-full h-12 px-4 rounded-md bg-white/5 border border-white/15 text-white placeholder:text-white/40 focus:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30 transition-colors disabled:opacity-60"
-                  />
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full inline-flex items-center justify-center gap-2 h-12 rounded-md bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-opacity disabled:opacity-70 disabled:cursor-not-allowed"
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="animate-spin" size={18} />
-                        Subscribing…
-                      </>
-                    ) : (
-                      <>Join the List →</>
-                    )}
-                  </button>
-
-                  <div className="min-h-[20px]" aria-live="polite">
-                    {error && (
-                      <p className="inline-flex items-center gap-1.5 text-red-300 text-sm">
-                        <AlertCircle size={14} />
-                        {error}
-                      </p>
-                    )}
-                  </div>
-                </form>
-
-                <p className="mt-2 text-[11px] text-white/45 text-center">
-                  No spam. Unsubscribe anytime. ~2 emails/month.
-                </p>
-              </>
-            )}
-          </div>
-        </div>
       </div>
-
-      <style>{`
-        @keyframes popupGlow {
-          0%, 100% { opacity: 0.45; transform: scale(1); }
-          50% { opacity: 0.75; transform: scale(1.08); }
-        }
-      `}</style>
     </div>
   );
 };

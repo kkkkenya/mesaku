@@ -10,6 +10,9 @@ import {
   Menu,
   X,
   Mail,
+  Users,
+  FolderOpen,
+  BookOpen,
   Sparkles,
   HelpCircle,
 } from "lucide-react";
@@ -19,7 +22,10 @@ const links = [
   { to: "/admin/events", label: "Events", icon: CalendarDays, tour: "nav-events" },
   { to: "/admin/merchandise", label: "Merchandise", icon: ShoppingBag, tour: "nav-merchandise" },
   { to: "/admin/announcements", label: "Announcements", icon: Megaphone, tour: "nav-announcements" },
+  { to: "/admin/executives", label: "Executives", icon: Users, tour: "nav-executives" },
   { to: "/admin/newsletter", label: "Newsletter", icon: Mail, tour: "nav-newsletter" },
+  { to: "/admin/assets", label: "Assets", icon: FolderOpen, tour: "nav-assets" },
+  { to: "/admin/help", label: "Guide & FAQ", icon: BookOpen, tour: "nav-help" },
 ];
 
 export default function AdminLayout() {
