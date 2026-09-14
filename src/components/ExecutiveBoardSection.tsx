@@ -42,8 +42,10 @@ function MemberCard({
           alt={`${name} - ${role}, MESA KU`}
           width={400}
           height={533}
-          loading="eager"
-          fetchPriority="high"
+          // Board sits at the bottom of the page: lazy-load so the photos
+          // never compete with the hero, and keep full quality since the
+          // wait is acceptable here.
+          loading="lazy"
           decoding="async"
           onLoad={() => setLoaded(true)}
           className="absolute inset-0 h-full w-full object-cover object-top transition-opacity duration-300"

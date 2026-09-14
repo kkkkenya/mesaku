@@ -436,11 +436,16 @@ export default function AdminHelp() {
               items={[
                 "To update someone (new photo, new position, corrected name): find their card, click the pencil, edit, save.",
                 "To add a new member: click 'Add Executive', fill in the details, and upload a photo — portraits at a 3:4 ratio look best.",
-                "To control the order: use the up/down arrows on each card. The Chairman is traditionally first.",
+                "To arrange the board: click 'Change Order', drag the cards (or use the small arrows on each row) into position, then 'Save Order'. Use 'Revert' to discard your changes — nothing is saved until you press Save Order.",
                 "When the board changes yearly: archive the outgoing members (they stay in the Archive tab) and add the new ones. Restore an archived member any time.",
                 "To remove someone entirely, use Delete — this also removes their photo file from storage.",
               ]}
             />
+            <Tip>
+              'Change Order' is the fastest way to fix a scrambled board: it
+              re-numers everyone cleanly when you save, no matter how the
+              positions got tangled.
+            </Tip>
             <Tip>
               A member keeps the site's original bundled photo until someone
               uploads a photo for them — so the page never looks broken while you

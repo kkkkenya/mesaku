@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadFile, deleteFile } from "@/lib/storage";
 import {
@@ -13,6 +13,8 @@ import {
   ChevronUp,
   ChevronDown,
   UserRound,
+  GripVertical,
+  ArrowUpDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
@@ -40,6 +42,13 @@ export default function AdminExecutives() {
   const [originalUrl, setOriginalUrl] = useState<string | null>(null);
   const [reordering, setReordering] = useState<string | null>(null);
   const [view, setView] = useState<"active" | "archived">("active");
+
+  // Drag-and-drop reorder mode — positions are only written when saved.
+  const [reorderMode, setReorderMode] = useState(false);
+  const [order, setOrder] = useState<Exec[]>([]);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [savingOrder, setSavingOrder] = useState(false);
+  const dragInfo = useRef<{ id: string } | null>(null);
 
   const fetchItems = async () => {
     setLoading(true);
@@ -179,9 +188,89 @@ export default function AdminExecutives() {
     fetchItems();
   };
 
+  // ── Drag-and-drop reorder (Active tab only) ──
+  // Positions are staged locally and only written to the database on Save.
+
+  const revertReorder = () => {
+    setOrder([]);
+    setDragId(null);
+    setReorderMode(false);
+  };
+
+  const saveReorder = async () => {
+    setSavingOrder(true);
+    // Renumber 1..N from the staged positions — this also cleans up any
+    // duplicate order_index values in the table.
+    const results = await Promise.all(
+      order.map((item, idx) =>
+        supabase.from("executives").update({ order_index: idx + 1 }).eq("id", item.id),
+      ),
+    );
+    const failed = results.find((r) => r.error);
+    setSavingOrder(false);
+    if (failed?.error) {
+      toast.error("Failed to save order: " + failed.error.message);
+      return;
+    }
+    toast.success("Board order saved");
+    revertReorder();
+    fetchItems();
+  };
+
+  const onDragStart = (e: React.DragEvent, item: Exec) => {
+    dragInfo.current = { id: item.id };
+    setDragId(item.id);
+    e.dataTransfer.effectAllowed = "move";
+    try {
+      e.dataTransfer.setData("text/plain", item.id);
+    } catch {
+      // some browsers require data to be set; ignore failures
+    }
+  };
+
+  const onDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const onDrop = (e: React.DragEvent, target: Exec) => {
+    e.preventDefault();
+    const draggedId = dragInfo.current?.id ?? e.dataTransfer.getData("text/plain");
+    setDragId(null);
+    dragInfo.current = null;
+    if (!draggedId || draggedId === target.id) return;
+    setOrder((prev) => {
+      const from = prev.findIndex((i) => i.id === draggedId);
+      const to = prev.findIndex((i) => i.id === target.id);
+      if (from < 0 || to < 0) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+  };
+
+  // Keyboard fallback for the drag handle: move a row with the arrow keys.
+  const moveStaged = (idx: number, direction: -1 | 1) => {
+    setOrder((prev) => {
+      const to = idx + direction;
+      if (to < 0 || to >= prev.length) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(idx, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+  };
+
   const archivedItems = items.filter((i) => i.archived);
   const activeItems = items.filter((i) => !i.archived);
   const visible = view === "archived" ? archivedItems : activeItems;
+
+  const startReorderFromActive = () => {
+    setView("active");
+    setOrder(activeItems);
+    setReorderMode(true);
+  };
 
   const modalPhoto = imageFile
     ? previewUrl
@@ -198,14 +287,56 @@ export default function AdminExecutives() {
         breadcrumb="Executives"
         subtitle="Manage the leadership team shown on the homepage — update names, positions, and photos, or add new members."
         action={
-          <button
-            onClick={openNew}
-            className="inline-flex items-center gap-2 h-11 px-5 rounded-lg bg-teal text-teal-foreground font-semibold hover:opacity-90 transition-opacity shadow-sm"
-          >
-            <Plus className="h-4 w-4" /> Add Executive
-          </button>
+          reorderMode ? undefined : (
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button
+                onClick={startReorderFromActive}
+                disabled={loading || activeItems.length < 2}
+                className="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-lg border-2 border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <ArrowUpDown className="h-4 w-4" /> Change Order
+              </button>
+              <button
+                onClick={openNew}
+                className="inline-flex items-center gap-2 h-11 px-5 rounded-lg bg-teal text-teal-foreground font-semibold hover:opacity-90 transition-opacity shadow-sm"
+              >
+                <Plus className="h-4 w-4" /> Add Executive
+              </button>
+            </div>
+          )
         }
       />
+
+      {/* ── Board order section: drag to arrange, Save writes, Revert discards ── */}
+      {reorderMode && (
+        <div className="mb-6 rounded-xl border-2 border-teal/30 bg-teal-soft/60 p-4 sm:p-5">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="flex-1 min-w-0">
+              <p className="font-heading font-bold text-slate-900">Arrange the board</p>
+              <p className="text-sm text-slate-600 mt-0.5">
+                Drag the cards (or use the handle's arrow keys) into the order they
+                should appear on the homepage. Nothing is saved until you press Save Order.
+              </p>
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <button
+                onClick={revertReorder}
+                disabled={savingOrder}
+                className="h-11 px-5 rounded-lg border-2 border-slate-200 bg-white text-slate-700 font-semibold hover:bg-slate-50 transition-colors disabled:opacity-50"
+              >
+                Revert
+              </button>
+              <button
+                onClick={saveReorder}
+                disabled={savingOrder}
+                className="inline-flex items-center gap-2 h-11 px-6 rounded-lg bg-teal text-teal-foreground font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {savingOrder ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Order"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {editing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -293,7 +424,7 @@ export default function AdminExecutives() {
         </div>
       )}
 
-      {!loading && items.length > 0 && (
+      {!loading && items.length > 0 && !reorderMode && (
         <ArchiveTabs
           view={view}
           onChange={setView}
@@ -302,7 +433,69 @@ export default function AdminExecutives() {
         />
       )}
 
-      {loading ? (
+      {reorderMode ? (
+        <div className="space-y-3">
+          {order.map((item, idx) => (
+            <div
+              key={item.id}
+              data-id={item.id}
+              draggable
+              onDragStart={(e) => onDragStart(e, item)}
+              onDragOver={onDragOver}
+              onDrop={(e) => onDrop(e, item)}
+              onDragEnd={() => {
+                setDragId(null);
+                dragInfo.current = null;
+              }}
+              className={`flex items-center gap-3 p-4 bg-white rounded-xl border-2 transition-all select-none ${
+                dragId === item.id
+                  ? "border-teal opacity-50 scale-[0.99] shadow-lg"
+                  : "border-slate-200 shadow-sm hover:border-slate-300"
+              } ${dragId && dragId !== item.id ? "" : "cursor-grab"} active:cursor-grabbing`}
+            >
+              <GripVertical className="h-5 w-5 text-slate-400 shrink-0" aria-hidden />
+              <span className="w-6 text-center text-xs font-bold text-slate-400 shrink-0">
+                {idx + 1}
+              </span>
+              {photoFor(item) ? (
+                <img
+                  src={photoFor(item)!}
+                  alt=""
+                  className="h-12 w-12 object-cover object-top rounded-lg shrink-0 pointer-events-none"
+                />
+              ) : (
+                <div className="h-12 w-12 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                  <UserRound className="h-5 w-5 text-slate-400" />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold truncate text-slate-900">{item.name}</p>
+                <p className="text-sm text-slate-500 truncate">{item.role}</p>
+              </div>
+              <div className="flex flex-col shrink-0">
+                <button
+                  type="button"
+                  aria-label={`Move ${item.name} up`}
+                  onClick={() => moveStaged(idx, -1)}
+                  disabled={idx === 0}
+                  className="h-6 w-7 inline-flex items-center justify-center rounded-md hover:bg-slate-100 text-slate-500 disabled:opacity-25 disabled:hover:bg-transparent"
+                >
+                  <ChevronUp className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Move ${item.name} down`}
+                  onClick={() => moveStaged(idx, 1)}
+                  disabled={idx === order.length - 1}
+                  className="h-6 w-7 inline-flex items-center justify-center rounded-md hover:bg-slate-100 text-slate-500 disabled:opacity-25 disabled:hover:bg-transparent"
+                >
+                  <ChevronDown className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : loading ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-6 w-6 animate-spin text-teal" />
         </div>

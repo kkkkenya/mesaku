@@ -1,16 +1,18 @@
 // Photos bundled with the original site, keyed by the seeded executive IDs.
 // They are shown only while a member has no photo uploaded in the admin
 // panel — once an image_url exists in the database it takes priority.
-import isaacImg from "@/assets/exec-isaac.png";
-import gregoryImg from "@/assets/exec-gregory.png";
-import wisemanImg from "@/assets/exec-wiseman.png";
-import lewisImg from "@/assets/exec-lewis.png";
-import noelynImg from "@/assets/exec-noelyn.png";
-import teddyImg from "@/assets/exec-teddy.png";
-import gloriaImg from "@/assets/exec-gloria.png";
-import godwinImg from "@/assets/exec-godwin.png";
-import stephenImg from "@/assets/exec-stephen.png";
-import lyneforImg from "@/assets/exec-lyneford.png";
+// Files are full-resolution WebP (quality 92): sharp visually lossless
+// conversions of the original PNGs, ~94% smaller.
+import isaacImg from "@/assets/exec-isaac.webp";
+import gregoryImg from "@/assets/exec-gregory.webp";
+import wisemanImg from "@/assets/exec-wiseman.webp";
+import lewisImg from "@/assets/exec-lewis.webp";
+import noelynImg from "@/assets/exec-noelyn.webp";
+import teddyImg from "@/assets/exec-teddy.webp";
+import gloriaImg from "@/assets/exec-gloria.webp";
+import godwinImg from "@/assets/exec-godwin.webp";
+import stephenImg from "@/assets/exec-stephen.webp";
+import lyneforImg from "@/assets/exec-lyneford.webp";
 
 export const bundledPhotos: Record<string, string> = {
   "2d506c16-4bf5-4e43-a2c3-e75f66e0cd85": isaacImg,
